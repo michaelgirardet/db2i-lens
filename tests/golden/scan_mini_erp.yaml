@@ -1,0 +1,513 @@
+version: '1.0'
+generated_at: STABLE
+mode: offline
+source: tests/fixtures/mini_erp
+schema_name: DEMO_LIB
+sample_rows: 5000
+summary:
+  table_count: 4
+  column_count: 17
+  finding_count: 3
+  findings_by_severity:
+    critical: 0
+    warning: 2
+    info: 1
+tables:
+- name: ARTICLES
+  columns:
+  - name: ARTID
+    metadata:
+      name: ARTID
+      data_type: CHAR
+      length: 10
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: A100
+      max_value: A500
+      top_values:
+      - value: A100
+        count: 1
+      - value: A200
+        count: 1
+      - value: A300
+        count: 1
+      - value: A400
+        count: 1
+      - value: A500
+        count: 1
+    findings: []
+  - name: ARTDESC
+    metadata:
+      name: ARTDESC
+      data_type: CHAR
+      length: 40
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: BOLT-E
+      max_value: WIDGET-A
+      top_values:
+      - value: WIDGET-A
+        count: 1
+      - value: GADGET-B
+        count: 1
+      - value: MOTOR-C
+        count: 1
+      - value: SEAL-D
+        count: 1
+      - value: BOLT-E
+        count: 1
+    findings: []
+  - name: CRTDTE
+    metadata:
+      name: CRTDTE
+      data_type: DECIMAL
+      length: 7
+      scale: 0
+      nullable: false
+      ccsid: null
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: 1220101
+      max_value: 1260301
+      top_values:
+      - value: 1250115
+        count: 1
+      - value: 1241201
+        count: 1
+      - value: 1260301
+        count: 1
+      - value: 1230601
+        count: 1
+      - value: 1220101
+        count: 1
+    findings: []
+  - name: STDPRC
+    metadata:
+      name: STDPRC
+      data_type: DECIMAL
+      length: 9
+      scale: 0
+      nullable: false
+      ccsid: null
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 4
+      min_value: 0
+      max_value: 4599
+      top_values:
+      - value: 0
+        count: 2
+      - value: 1999
+        count: 1
+      - value: 4599
+        count: 1
+      - value: 125
+        count: 1
+    findings: []
+- name: CLIENTS
+  columns:
+  - name: CUSID
+    metadata:
+      name: CUSID
+      data_type: CHAR
+      length: 10
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: C0001
+      max_value: C0005
+      top_values:
+      - value: C0001
+        count: 1
+      - value: C0002
+        count: 1
+      - value: C0003
+        count: 1
+      - value: C0004
+        count: 1
+      - value: C0005
+        count: 1
+    findings: []
+  - name: CUSNAME
+    metadata:
+      name: CUSNAME
+      data_type: CHAR
+      length: 30
+      scale: null
+      nullable: false
+      ccsid: 65535
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 2
+      distinct_count: 5
+      min_value: ACME CORP
+      max_value: GAMMA LOGISTICS
+      top_values:
+      - value: ACME CORP
+        count: 1
+      - value: '              '
+        count: 1
+      - value: BETA INDUSTRIES
+        count: 1
+      - value: '   '
+        count: 1
+      - value: GAMMA LOGISTICS
+        count: 1
+    findings:
+    - rule_id: R05
+      severity: warning
+      message: Column CLIENTS.CUSNAME uses blanks as NULL (40% of sample)
+      evidence:
+        blank_count: 2
+        row_count: 5
+        blank_ratio: 0.4
+        threshold: 0.2
+      suggested_fix: NULLIF(TRIM(CUSNAME), '')
+  - name: ACTFLG
+    metadata:
+      name: ACTFLG
+      data_type: CHAR
+      length: 1
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 2
+      min_value: N
+      max_value: Y
+      top_values:
+      - value: Y
+        count: 3
+      - value: N
+        count: 2
+    findings:
+    - rule_id: R08
+      severity: info
+      message: Column CLIENTS.ACTFLG looks like a binary flag (['N', 'Y'])
+      evidence:
+        values:
+        - N
+        - Y
+        distinct_count: 2
+        length: 1
+      suggested_fix: CASE WHEN ACTFLG IN ('Y', '1') THEN TRUE WHEN ACTFLG IN ('N',
+        '0') THEN FALSE END
+  - name: PHNNUM
+    metadata:
+      name: PHNNUM
+      data_type: DECIMAL
+      length: 8
+      scale: 0
+      nullable: false
+      ccsid: null
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: 33445566
+      max_value: 98765432
+      top_values:
+      - value: 61234567
+        count: 1
+      - value: 98765432
+        count: 1
+      - value: 55555555
+        count: 1
+      - value: 33445566
+        count: 1
+      - value: 77889900
+        count: 1
+    findings: []
+- name: COMMANDES
+  columns:
+  - name: ORDID
+    metadata:
+      name: ORDID
+      data_type: CHAR
+      length: 10
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: O1001
+      max_value: O1005
+      top_values:
+      - value: O1001
+        count: 1
+      - value: O1002
+        count: 1
+      - value: O1003
+        count: 1
+      - value: O1004
+        count: 1
+      - value: O1005
+        count: 1
+    findings: []
+  - name: CUSID
+    metadata:
+      name: CUSID
+      data_type: CHAR
+      length: 10
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 4
+      min_value: C0001
+      max_value: C0005
+      top_values:
+      - value: C0001
+        count: 2
+      - value: C0002
+        count: 1
+      - value: C0003
+        count: 1
+      - value: C0005
+        count: 1
+    findings: []
+  - name: ORDDTE
+    metadata:
+      name: ORDDTE
+      data_type: DECIMAL
+      length: 8
+      scale: 0
+      nullable: false
+      ccsid: null
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: 20260115
+      max_value: 20261231
+      top_values:
+      - value: 20260115
+        count: 1
+      - value: 20260228
+        count: 1
+      - value: 20260301
+        count: 1
+      - value: 20261231
+        count: 1
+      - value: 20261111
+        count: 1
+    findings:
+    - rule_id: R01
+      severity: warning
+      message: Column COMMANDES.ORDDTE stores dates as DEC(8,0) YYYYMMDD
+      evidence:
+        data_type: DECIMAL
+        length: 8
+        scale: 0
+        sample_size: 5
+        format: YYYYMMDD
+      suggested_fix: TO_DATE(TO_CHAR(ORDDTE), 'YYYYMMDD')
+  - name: ORDSTS
+    metadata:
+      name: ORDSTS
+      data_type: CHAR
+      length: 1
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 5
+      null_count: 0
+      blank_count: 0
+      distinct_count: 3
+      min_value: C
+      max_value: X
+      top_values:
+      - value: O
+        count: 3
+      - value: C
+        count: 1
+      - value: X
+        count: 1
+    findings: []
+- name: LIGNES_CMD
+  columns:
+  - name: ORDID
+    metadata:
+      name: ORDID
+      data_type: CHAR
+      length: 10
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 6
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: O1001
+      max_value: O1005
+      top_values:
+      - value: O1001
+        count: 2
+      - value: O1002
+        count: 1
+      - value: O1003
+        count: 1
+      - value: O1004
+        count: 1
+      - value: O1005
+        count: 1
+    findings: []
+  - name: ARTID
+    metadata:
+      name: ARTID
+      data_type: CHAR
+      length: 10
+      scale: null
+      nullable: false
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 6
+      null_count: 0
+      blank_count: 0
+      distinct_count: 3
+      min_value: A100
+      max_value: A300
+      top_values:
+      - value: A100
+        count: 3
+      - value: A200
+        count: 2
+      - value: A300
+        count: 1
+    findings: []
+  - name: QTY
+    metadata:
+      name: QTY
+      data_type: DECIMAL
+      length: 7
+      scale: 0
+      nullable: false
+      ccsid: null
+      comment: null
+    stats:
+      row_count: 6
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: 1
+      max_value: 10
+      top_values:
+      - value: 1
+        count: 2
+      - value: 2
+        count: 1
+      - value: 10
+        count: 1
+      - value: 3
+        count: 1
+      - value: 5
+        count: 1
+    findings: []
+  - name: PRC
+    metadata:
+      name: PRC
+      data_type: DECIMAL
+      length: 9
+      scale: 0
+      nullable: false
+      ccsid: null
+      comment: null
+    stats:
+      row_count: 6
+      null_count: 0
+      blank_count: 0
+      distinct_count: 5
+      min_value: 1899
+      max_value: 9990
+      top_values:
+      - value: 1999
+        count: 2
+      - value: 4599
+        count: 1
+      - value: 1899
+        count: 1
+      - value: 9990
+        count: 1
+      - value: 4500
+        count: 1
+    findings: []
+  - name: TAGS
+    metadata:
+      name: TAGS
+      data_type: VARCHAR
+      length: 50
+      scale: null
+      nullable: true
+      ccsid: 37
+      comment: null
+    stats:
+      row_count: 6
+      null_count: 0
+      blank_count: 0
+      distinct_count: 6
+      min_value: bulk
+      max_value: spare|urgent
+      top_values:
+      - value: spare|urgent
+        count: 1
+      - value: bulk
+        count: 1
+      - value: promo
+        count: 1
+      - value: export|hazmat
+        count: 1
+      - value: retail
+        count: 1
+      - value: spare
+        count: 1
+    findings: []
