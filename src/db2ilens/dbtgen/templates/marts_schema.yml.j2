@@ -15,12 +15,14 @@ models:
 {% endif %}
 {% if column.accepted_values %}
           - accepted_values:
-              values: [{% for value in column.accepted_values %}'{{ value }}'{% if not loop.last %}, {% endif %}{% endfor %}]
+              arguments:
+                values: [{% for value in column.accepted_values %}'{{ value }}'{% if not loop.last %}, {% endif %}{% endfor %}]
 {% endif %}
 {% for to_model, field in column.relationship_targets %}
           - relationships:
-              to: ref('{{ to_model }}')
-              field: {{ field }}
+              arguments:
+                to: ref('{{ to_model }}')
+                field: {{ field }}
 {% endfor %}
 {% endif %}
 {% endfor %}

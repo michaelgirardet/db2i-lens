@@ -4,9 +4,9 @@ Outil open source qui profile les données d'un IBM i (AS/400), détecte les pi�
 (EBCDIC, décimales packées, dates numériques, noms courts) et génère automatiquement
 le SQL dbt de nettoyage pour une migration vers un stack moderne.
 
-> **Statut :** phases **P0–P3** livrées — scan offline, 9 règles (R01–R08),
-> contrat `scan.yaml`, rapports Markdown/HTML autonomes.
-> En cours : **P4** (générateur dbt + e2e DuckDB).
+> **Statut :** phases **P0–P4** livrées — scan offline, rapports HTML,
+> générateur dbt (Jinja2) + `dbt run`/`dbt test` DuckDB sans retouche.
+> Prochaine étape : **P5** (connector JDBC IBM i + démo PUB400).
 
 ## Problème
 
@@ -22,7 +22,7 @@ pas sur la connexion elle-même.
 | **P1** | Connector offline + profiling + R01, R05, R08 + `scan --offline` | [x] |
 | **P2** | Règles R02–R04, R06, R07 + dictionnaire d'abréviations | [x] |
 | **P3** | Rapport Markdown/HTML + `scan.yaml` stable | [x] |
-| **P4** | Générateur dbt + e2e DuckDB | [ ] |
+| **P4** | Générateur dbt + e2e DuckDB | [x] |
 | **P5** | Connector JDBC JT400 + doc PUB400 | [ ] |
 | **P6** | Relations R10, naming LLM, Postgres/Snowflake (backlog) | [ ] |
 

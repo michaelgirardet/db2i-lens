@@ -1,6 +1,6 @@
 ORDID,ARTID,QTY,PRC,TAGS
 O1001,A100,2,1999,spare|urgent
-O1001,A200,1,4599,bulk,retail
+O1001,A200,1,4599,"bulk,retail"
 O1002,A100,10,1899,promo
 O1003,A300,3,9990,export|hazmat
 O1004,A200,5,4500,retail

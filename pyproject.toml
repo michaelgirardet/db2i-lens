@@ -53,6 +53,9 @@ default-groups = ["dev"]
 
 [dependency-groups]
 dev = [
+    "dbt-core>=1.12.6",
+    "dbt-duckdb>=1.11.1",
+    "duckdb>=2.0.0",
     "mypy>=1.11",
     "pytest>=8.3",
     "ruff>=0.6",

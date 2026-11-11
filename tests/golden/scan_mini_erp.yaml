@@ -619,12 +619,12 @@ tables:
       null_count: 0
       blank_count: 0
       distinct_count: 6
-      min_value: bulk
+      min_value: bulk,retail
       max_value: spare|urgent
       top_values:
       - value: spare|urgent
         count: 1
-      - value: bulk
+      - value: bulk,retail
         count: 1
       - value: promo
         count: 1

@@ -12,4 +12,5 @@ select
 {% for column in table.columns %}
   {{ column.name }}{% if not loop.last %},{% endif %}
 {% endfor %}
+
 from {{ '{{' }} source('{{ source_name }}', '{{ table.name }}') {{ '}}' }}
