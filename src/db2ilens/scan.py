@@ -230,7 +230,7 @@ def build_scan_result(
 def write_scan_yaml(result: ScanResult, out_path: Path) -> None:
     """Serialize a ScanResult to YAML."""
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = asdict(result)
+    payload = _yaml_safe(asdict(result))
     out_path.write_text(
         yaml.safe_dump(payload, sort_keys=False, allow_unicode=True),
         encoding="utf-8",
@@ -407,11 +407,14 @@ def _run_rules(profile: ColumnProfile) -> list[ScanFinding]:
 
 
 def _to_scan_finding(finding: Finding, suggested_fix: str | None) -> ScanFinding:
+    evidence = _yaml_safe(dict(finding.evidence))
+    if not isinstance(evidence, dict):
+        evidence = {}
     return ScanFinding(
         rule_id=finding.rule_id,
         severity=finding.severity.value,
         message=finding.message,
-        evidence=dict(finding.evidence),
+        evidence=evidence,
         suggested_fix=suggested_fix or finding.suggested_fix,
     )
 
@@ -445,6 +448,29 @@ def _to_column_stats(profile: ColumnProfile) -> ScanColumnStats:
 
 
 def _yaml_safe(value: Any) -> Any:
-    if isinstance(value, (str, int, float, bool)) or value is None:
+    """
+    Coerce values to YAML-safe Python builtins.
+
+    JT400/JPype boxed numbers often pass ``isinstance(..., int)`` but are not
+    plain ``int`` instances, and ``yaml.safe_dump`` rejects them.
+    """
+    if value is None:
+        return None
+    value_type = type(value)
+    if value_type is bool or value_type is str:
         return value
-    return str(value)
+    if value_type is int or value_type is float:
+        return value
+    if isinstance(value, dict):
+        return {str(key): _yaml_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_yaml_safe(item) for item in value]
+    text = str(value).strip()
+    if text == "":
+        return text
+    try:
+        if text.isdigit() or (text.startswith("-") and text[1:].isdigit()):
+            return int(text)
+        return float(text)
+    except ValueError:
+        return str(value)

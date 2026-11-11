@@ -288,34 +288,51 @@ def _coerce_jdbc_value(value: Any, meta: ColumnMeta | None) -> Any:
     if value is None:
         return None
     if meta is None:
-        return value
+        return _java_to_python(value)
     data_type = meta.data_type.upper()
     if data_type in {"DECIMAL", "NUMERIC", "INTEGER", "SMALLINT", "BIGINT"}:
-        if isinstance(value, bool):
-            return int(value)
-        if isinstance(value, (int, float)):
-            if meta.scale and meta.scale > 0:
-                return float(value)
-            return int(value)
-        text = str(value).strip()
-        if text == "":
+        number = _java_to_python(value)
+        if number is None:
             return None
         if meta.scale and meta.scale > 0:
-            return float(text)
-        return int(float(text)) if "." in text else int(text)
+            return float(number)
+        return int(number)
     return str(value)
+
+
+def _java_to_python(value: Any) -> Any:
+    """Convert JT400/JPype scalars to plain Python builtins."""
+    if value is None:
+        return None
+    value_type = type(value)
+    if value_type is bool or value_type is str:
+        return value
+    if value_type is int or value_type is float:
+        return value
+    text = str(value).strip()
+    if text == "":
+        return None
+    try:
+        if text.isdigit() or (text.startswith("-") and text[1:].isdigit()):
+            return int(text)
+        return float(text)
+    except ValueError:
+        return str(value)
 
 
 def _optional_int(value: object) -> int | None:
     if value is None:
         return None
-    if isinstance(value, bool):
-        return int(value)
-    if isinstance(value, int):
-        return value
-    if isinstance(value, float):
-        return int(value)
-    text = str(value).strip()
+    converted = _java_to_python(value)
+    if converted is None:
+        return None
+    if type(converted) is bool:
+        return int(converted)
+    if type(converted) is int:
+        return converted
+    if type(converted) is float:
+        return int(converted)
+    text = str(converted).strip()
     if text == "":
         return None
     try:

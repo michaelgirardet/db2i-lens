@@ -123,6 +123,10 @@ def test_resolve_jt400_jar_uses_env(monkeypatch, tmp_path) -> None:  # type: ign
 def test_resolve_jt400_jar_missing_raises(monkeypatch, tmp_path) -> None:  # type: ignore[no-untyped-def]
     monkeypatch.delenv("JT400_JAR", raising=False)
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "db2ilens.connector.ibmi_jdbc.Path.home",
+        lambda: tmp_path / "empty-home",
+    )
     try:
         resolve_jt400_jar()
         raised = False
