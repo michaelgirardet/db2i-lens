@@ -7,10 +7,10 @@ sample_rows: 5000
 summary:
   table_count: 4
   column_count: 17
-  finding_count: 3
+  finding_count: 6
   findings_by_severity:
-    critical: 0
-    warning: 2
+    critical: 1
+    warning: 4
     info: 1
 tables:
 - name: ARTICLES
@@ -21,6 +21,7 @@ tables:
       data_type: CHAR
       length: 10
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -49,6 +50,7 @@ tables:
       data_type: CHAR
       length: 40
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -77,6 +79,7 @@ tables:
       data_type: DECIMAL
       length: 7
       scale: 0
+      implied_scale: null
       nullable: false
       ccsid: null
       comment: null
@@ -85,7 +88,7 @@ tables:
       null_count: 0
       blank_count: 0
       distinct_count: 5
-      min_value: 1220101
+      min_value: 990615
       max_value: 1260301
       top_values:
       - value: 1250115
@@ -94,17 +97,36 @@ tables:
         count: 1
       - value: 1260301
         count: 1
-      - value: 1230601
+      - value: 990615
         count: 1
       - value: 1220101
         count: 1
-    findings: []
+    findings:
+    - rule_id: R02
+      severity: warning
+      message: Column ARTICLES.CRTDTE stores dates as DEC(7,0) IBM CYYMMDD
+      evidence:
+        data_type: DECIMAL
+        length: 7
+        scale: 0
+        sample_size: 5
+        format: CYYMMDD
+        decoded_samples:
+        - '2025-01-15'
+        - '2024-12-01'
+        - '2026-03-01'
+        - '1999-06-15'
+        - '2022-01-01'
+      suggested_fix: TO_DATE(CASE WHEN SUBSTR(LPAD(CAST(CRTDTE AS VARCHAR), 7, '0'),
+        1, 1) = '0' THEN '19' ELSE '20' END || SUBSTR(LPAD(CAST(CRTDTE AS VARCHAR),
+        7, '0'), 2, 6), 'YYYYMMDD')
   - name: STDPRC
     metadata:
       name: STDPRC
       data_type: DECIMAL
       length: 9
       scale: 0
+      implied_scale: null
       nullable: false
       ccsid: null
       comment: null
@@ -133,6 +155,7 @@ tables:
       data_type: CHAR
       length: 10
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -161,6 +184,7 @@ tables:
       data_type: CHAR
       length: 30
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 65535
       comment: null
@@ -183,6 +207,14 @@ tables:
       - value: GAMMA LOGISTICS
         count: 1
     findings:
+    - rule_id: R03
+      severity: critical
+      message: Column CLIENTS.CUSNAME has CCSID 65535 (binary / no character conversion)
+      evidence:
+        ccsid: 65535
+        data_type: CHAR
+      suggested_fix: 'CAST(CUSNAME AS VARCHAR) /* TODO: apply CCSID 65535 translation
+        table */'
     - rule_id: R05
       severity: warning
       message: Column CLIENTS.CUSNAME uses blanks as NULL (40% of sample)
@@ -198,6 +230,7 @@ tables:
       data_type: CHAR
       length: 1
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -231,6 +264,7 @@ tables:
       data_type: DECIMAL
       length: 8
       scale: 0
+      implied_scale: null
       nullable: false
       ccsid: null
       comment: null
@@ -261,6 +295,7 @@ tables:
       data_type: CHAR
       length: 10
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -289,6 +324,7 @@ tables:
       data_type: CHAR
       length: 10
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -315,6 +351,7 @@ tables:
       data_type: DECIMAL
       length: 8
       scale: 0
+      implied_scale: null
       nullable: false
       ccsid: null
       comment: null
@@ -353,6 +390,7 @@ tables:
       data_type: CHAR
       length: 1
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -379,6 +417,7 @@ tables:
       data_type: CHAR
       length: 10
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -407,6 +446,7 @@ tables:
       data_type: CHAR
       length: 10
       scale: null
+      implied_scale: null
       nullable: false
       ccsid: 37
       comment: null
@@ -431,6 +471,7 @@ tables:
       data_type: DECIMAL
       length: 7
       scale: 0
+      implied_scale: null
       nullable: false
       ccsid: null
       comment: null
@@ -459,6 +500,7 @@ tables:
       data_type: DECIMAL
       length: 9
       scale: 0
+      implied_scale: 2
       nullable: false
       ccsid: null
       comment: null
@@ -480,13 +522,23 @@ tables:
         count: 1
       - value: 4500
         count: 1
-    findings: []
+    findings:
+    - rule_id: R04
+      severity: warning
+      message: Column LIGNES_CMD.PRC stores an implied decimal with scale 2
+      evidence:
+        data_type: DECIMAL
+        length: 9
+        scale: 0
+        implied_scale: 2
+      suggested_fix: CAST(PRC / 100 AS DECIMAL(9, 2))
   - name: TAGS
     metadata:
       name: TAGS
       data_type: VARCHAR
       length: 50
       scale: null
+      implied_scale: null
       nullable: true
       ccsid: 37
       comment: null

@@ -20,6 +20,7 @@ class ColumnProfile:
     ccsid: int | None
     length: int | None
     scale: int | None
+    implied_scale: int | None
     row_count: int
     null_count: int
     blank_count: int
@@ -79,6 +80,7 @@ def profile_column(
         ccsid=meta.ccsid,
         length=meta.length,
         scale=meta.scale,
+        implied_scale=meta.implied_scale,
         row_count=len(sampled),
         null_count=null_count,
         blank_count=blank_count,

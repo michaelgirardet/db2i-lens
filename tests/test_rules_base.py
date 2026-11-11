@@ -48,16 +48,20 @@ def test_concrete_rule_detect_and_fix() -> None:
 def test_all_rules_registered_and_ignore_empty_profile() -> None:
     expected_ids = {"R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08", "R09"}
     assert {cls.id for cls in ALL_RULES} == expected_ids
-    implemented_fix_ids = {"R01", "R05", "R08"}
+    implemented_fix_ids = {"R01", "R02", "R03", "R04", "R05", "R08"}
     for cls in ALL_RULES:
         rule = cls()
         assert rule.detect({}) == []
+        evidence = (
+            {"implied_scale": 2, "length": 9} if rule.id == "R04" else {}
+        )
         finding = Finding(
             rule_id=rule.id,
             table="T",
             column="C",
             severity=rule.severity,
             message="n/a",
+            evidence=evidence,
         )
         if rule.id in implemented_fix_ids:
             assert rule.fix(finding) is not None

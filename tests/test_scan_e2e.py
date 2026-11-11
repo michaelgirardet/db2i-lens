@@ -43,10 +43,10 @@ def test_scan_offline_writes_complete_scan_yaml(tmp_path: Path) -> None:
 
     summary = data["summary"]
     assert summary["table_count"] == 4
-    assert summary["finding_count"] == 3
+    assert summary["finding_count"] == 6
     assert summary["findings_by_severity"] == {
-        "critical": 0,
-        "warning": 2,
+        "critical": 1,
+        "warning": 4,
         "info": 1,
     }
 
@@ -66,10 +66,16 @@ def test_scan_offline_writes_complete_scan_yaml(tmp_path: Path) -> None:
 
     assert set(by_key) == {
         ("R01", "COMMANDES", "ORDDTE"),
+        ("R02", "ARTICLES", "CRTDTE"),
+        ("R03", "CLIENTS", "CUSNAME"),
+        ("R04", "LIGNES_CMD", "PRC"),
         ("R05", "CLIENTS", "CUSNAME"),
         ("R08", "CLIENTS", "ACTFLG"),
     }
     assert by_key[("R01", "COMMANDES", "ORDDTE")]["severity"] == "warning"
+    assert by_key[("R02", "ARTICLES", "CRTDTE")]["severity"] == "warning"
+    assert by_key[("R03", "CLIENTS", "CUSNAME")]["severity"] == "critical"
+    assert by_key[("R04", "LIGNES_CMD", "PRC")]["severity"] == "warning"
     assert by_key[("R05", "CLIENTS", "CUSNAME")]["severity"] == "warning"
     assert by_key[("R08", "CLIENTS", "ACTFLG")]["severity"] == "info"
 
@@ -80,9 +86,15 @@ def test_scan_offline_writes_complete_scan_yaml(tmp_path: Path) -> None:
         "NULLIF(TRIM(CUSNAME), '')"
     )
     assert "TRUE" in by_key[("R08", "CLIENTS", "ACTFLG")]["suggested_fix"]
+    assert by_key[("R04", "LIGNES_CMD", "PRC")]["suggested_fix"] == (
+        "CAST(PRC / 100 AS DECIMAL(9, 2))"
+    )
 
     # Counter-examples must not produce findings.
     assert ("R01", "CLIENTS", "PHNNUM") not in by_key
+    assert ("R02", "LIGNES_CMD", "QTY") not in by_key
+    assert ("R03", "CLIENTS", "CUSID") not in by_key
+    assert ("R04", "LIGNES_CMD", "QTY") not in by_key
     assert ("R05", "ARTICLES", "ARTDESC") not in by_key
     assert ("R08", "COMMANDES", "ORDSTS") not in by_key
 

@@ -25,6 +25,7 @@ class ScanColumnMetadata:
     data_type: str
     length: int | None
     scale: int | None
+    implied_scale: int | None
     nullable: bool
     ccsid: int | None
     comment: str | None
@@ -203,6 +204,7 @@ def _to_column_metadata(meta: ColumnMeta) -> ScanColumnMetadata:
         data_type=meta.data_type,
         length=meta.length,
         scale=meta.scale,
+        implied_scale=meta.implied_scale,
         nullable=meta.nullable,
         ccsid=meta.ccsid,
         comment=meta.comment,

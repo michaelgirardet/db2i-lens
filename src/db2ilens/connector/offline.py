@@ -22,6 +22,7 @@ class ColumnMeta:
     data_type: str
     length: int | None = None
     scale: int | None = None
+    implied_scale: int | None = None
     nullable: bool = True
     ccsid: int | None = None
     comment: str | None = None
@@ -92,6 +93,7 @@ def _parse_columns(table_name: str, columns_raw: object) -> list[ColumnMeta]:
                 data_type=str(meta.get("data_type", "VARCHAR")),
                 length=_optional_int(meta.get("length")),
                 scale=_optional_int(meta.get("scale")),
+                implied_scale=_optional_int(meta.get("implied_scale")),
                 nullable=bool(meta.get("nullable", True)),
                 ccsid=_optional_int(meta.get("ccsid")),
                 comment=_optional_str(meta.get("comment")),
