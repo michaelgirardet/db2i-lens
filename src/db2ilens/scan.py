@@ -12,9 +12,56 @@ import yaml
 from db2ilens.connector.offline import ColumnMeta, OfflineExport, TableData, load_export
 from db2ilens.profiler.sampling import ColumnProfile, profile_table
 from db2ilens.rules import RULES
-from db2ilens.rules.base import Finding
+from db2ilens.rules.base import Finding, Severity
 
 SCAN_FORMAT_VERSION = "1.0"
+
+_KNOWN_SEVERITIES: frozenset[str] = frozenset(item.value for item in Severity)
+_KNOWN_RULE_IDS: frozenset[str] = frozenset(rule.id for rule in RULES)
+
+_ROOT_REQUIRED_FIELDS: tuple[str, ...] = (
+    "version",
+    "generated_at",
+    "mode",
+    "source",
+    "schema_name",
+    "sample_rows",
+    "summary",
+    "tables",
+)
+_SUMMARY_REQUIRED_FIELDS: tuple[str, ...] = (
+    "table_count",
+    "column_count",
+    "finding_count",
+    "findings_by_severity",
+)
+_COLUMN_REQUIRED_FIELDS: tuple[str, ...] = ("name", "metadata", "stats", "findings")
+_METADATA_REQUIRED_FIELDS: tuple[str, ...] = (
+    "name",
+    "data_type",
+    "length",
+    "scale",
+    "implied_scale",
+    "nullable",
+    "ccsid",
+    "comment",
+)
+_STATS_REQUIRED_FIELDS: tuple[str, ...] = (
+    "row_count",
+    "null_count",
+    "blank_count",
+    "distinct_count",
+    "min_value",
+    "max_value",
+    "top_values",
+)
+_FINDING_REQUIRED_FIELDS: tuple[str, ...] = (
+    "rule_id",
+    "severity",
+    "message",
+    "evidence",
+    "suggested_fix",
+)
 
 
 @dataclass(frozen=True)
@@ -161,6 +208,150 @@ def write_scan_yaml(result: ScanResult, out_path: Path) -> None:
         yaml.safe_dump(payload, sort_keys=False, allow_unicode=True),
         encoding="utf-8",
     )
+
+
+def validate_scan_document(document: Any) -> None:
+    """
+    Validate a loaded scan.yaml mapping against the published contract.
+
+    Raises ValueError on the first structural invariant violation. Consumers
+    (report, dbtgen, SaaS) should call this before trusting an external artifact.
+    """
+    if not isinstance(document, dict):
+        raise ValueError("scan.yaml must contain a mapping")
+
+    _require_fields(document, _ROOT_REQUIRED_FIELDS, path="scan")
+
+    version = document["version"]
+    if not isinstance(version, str):
+        raise ValueError("scan.version must be a string")
+    if version != SCAN_FORMAT_VERSION:
+        raise ValueError(
+            f"scan.version {version!r} is unsupported; "
+            f"expected {SCAN_FORMAT_VERSION!r}"
+        )
+
+    if not isinstance(document["generated_at"], str):
+        raise ValueError("scan.generated_at must be a string")
+    if not isinstance(document["mode"], str):
+        raise ValueError("scan.mode must be a string")
+    if not isinstance(document["source"], str):
+        raise ValueError("scan.source must be a string")
+    if not isinstance(document["schema_name"], str):
+        raise ValueError("scan.schema_name must be a string")
+    if not isinstance(document["sample_rows"], int):
+        raise ValueError("scan.sample_rows must be an integer")
+
+    summary = document["summary"]
+    if not isinstance(summary, dict):
+        raise ValueError("scan.summary must be a mapping")
+    _require_fields(summary, _SUMMARY_REQUIRED_FIELDS, path="scan.summary")
+    for key in ("table_count", "column_count", "finding_count"):
+        if not isinstance(summary[key], int):
+            raise ValueError(f"scan.summary.{key} must be an integer")
+
+    by_severity = summary["findings_by_severity"]
+    if not isinstance(by_severity, dict):
+        raise ValueError("scan.summary.findings_by_severity must be a mapping")
+    for severity, count in by_severity.items():
+        if severity not in _KNOWN_SEVERITIES:
+            raise ValueError(
+                f"unknown severity {severity!r} in scan.summary.findings_by_severity"
+            )
+        if not isinstance(count, int):
+            raise ValueError(
+                f"scan.summary.findings_by_severity[{severity!r}] must be an integer"
+            )
+
+    tables = document["tables"]
+    if not isinstance(tables, list):
+        raise ValueError("scan.tables must be a list")
+    for table_index, table in enumerate(tables):
+        _validate_table(table, path=f"scan.tables[{table_index}]")
+
+
+def _require_fields(
+    mapping: dict[str, Any],
+    required: tuple[str, ...],
+    *,
+    path: str,
+) -> None:
+    missing = [field for field in required if field not in mapping]
+    if missing:
+        raise ValueError(f"{path} missing required field(s): {', '.join(missing)}")
+
+
+def _validate_table(table: Any, *, path: str) -> None:
+    if not isinstance(table, dict):
+        raise ValueError(f"{path} must be a mapping")
+    _require_fields(table, ("name", "columns"), path=path)
+    if not isinstance(table["name"], str):
+        raise ValueError(f"{path}.name must be a string")
+    columns = table["columns"]
+    if not isinstance(columns, list):
+        raise ValueError(f"{path}.columns must be a list")
+    for column_index, column in enumerate(columns):
+        _validate_column(column, path=f"{path}.columns[{column_index}]")
+
+
+def _validate_column(column: Any, *, path: str) -> None:
+    if not isinstance(column, dict):
+        raise ValueError(f"{path} must be a mapping")
+    _require_fields(column, _COLUMN_REQUIRED_FIELDS, path=path)
+    if not isinstance(column["name"], str):
+        raise ValueError(f"{path}.name must be a string")
+
+    metadata = column["metadata"]
+    if not isinstance(metadata, dict):
+        raise ValueError(f"{path}.metadata must be a mapping")
+    _require_fields(metadata, _METADATA_REQUIRED_FIELDS, path=f"{path}.metadata")
+    if not isinstance(metadata["nullable"], bool):
+        raise ValueError(f"{path}.metadata.nullable must be a boolean")
+
+    stats = column["stats"]
+    if not isinstance(stats, dict):
+        raise ValueError(f"{path}.stats must be a mapping")
+    _require_fields(stats, _STATS_REQUIRED_FIELDS, path=f"{path}.stats")
+    if not isinstance(stats["top_values"], list):
+        raise ValueError(f"{path}.stats.top_values must be a list")
+
+    findings = column["findings"]
+    if not isinstance(findings, list):
+        raise ValueError(f"{path}.findings must be a list")
+    for finding_index, finding in enumerate(findings):
+        _validate_finding(finding, path=f"{path}.findings[{finding_index}]")
+
+
+def _validate_finding(finding: Any, *, path: str) -> None:
+    if not isinstance(finding, dict):
+        raise ValueError(f"{path} must be a mapping")
+    _require_fields(finding, _FINDING_REQUIRED_FIELDS, path=path)
+
+    rule_id = finding["rule_id"]
+    if not isinstance(rule_id, str):
+        raise ValueError(f"{path}.rule_id must be a string")
+    if rule_id not in _KNOWN_RULE_IDS:
+        raise ValueError(
+            f"{path}.rule_id {rule_id!r} is not registered in RULES "
+            f"(known: {sorted(_KNOWN_RULE_IDS)})"
+        )
+
+    severity = finding["severity"]
+    if not isinstance(severity, str):
+        raise ValueError(f"{path}.severity must be a string")
+    if severity not in _KNOWN_SEVERITIES:
+        raise ValueError(
+            f"{path}.severity {severity!r} is unknown "
+            f"(allowed: {sorted(_KNOWN_SEVERITIES)})"
+        )
+
+    if not isinstance(finding["message"], str):
+        raise ValueError(f"{path}.message must be a string")
+    if not isinstance(finding["evidence"], dict):
+        raise ValueError(f"{path}.evidence must be a mapping")
+    suggested_fix = finding["suggested_fix"]
+    if suggested_fix is not None and not isinstance(suggested_fix, str):
+        raise ValueError(f"{path}.suggested_fix must be a string or null")
 
 
 def _scan_table(table: TableData, sample_rows: int) -> list[ScanColumnResult]:
