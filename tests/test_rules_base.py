@@ -45,9 +45,10 @@ def test_concrete_rule_detect_and_fix() -> None:
     assert rule.fix(findings[0]) == "select C"
 
 
-def test_all_stub_rules_return_empty() -> None:
+def test_all_rules_registered_and_ignore_empty_profile() -> None:
     expected_ids = {"R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08", "R09"}
     assert {cls.id for cls in ALL_RULES} == expected_ids
+    implemented_fix_ids = {"R01"}
     for cls in ALL_RULES:
         rule = cls()
         assert rule.detect({}) == []
@@ -58,7 +59,10 @@ def test_all_stub_rules_return_empty() -> None:
             severity=rule.severity,
             message="n/a",
         )
-        assert rule.fix(finding) is None
+        if rule.id in implemented_fix_ids:
+            assert rule.fix(finding) is not None
+        else:
+            assert rule.fix(finding) is None
 
 
 def test_abbreviations_dictionary_has_core_entries() -> None:

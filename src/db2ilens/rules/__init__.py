@@ -24,6 +24,9 @@ ALL_RULES: list[type[Rule]] = [
     ZeroSentinelRule,
 ]
 
+# Instantiated registry used by the scan pipeline.
+RULES: list[Rule] = [rule_cls() for rule_cls in ALL_RULES]
+
 __all__ = [
     "ABBREVIATIONS",
     "ALL_RULES",
@@ -35,6 +38,7 @@ __all__ = [
     "MultiValueColumnRule",
     "NumericDateYYYYMMDDRule",
     "ObscureShortNameRule",
+    "RULES",
     "Rule",
     "Severity",
     "YnFlagRule",

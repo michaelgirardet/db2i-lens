@@ -18,6 +18,8 @@ class ColumnProfile:
     data_type: str
     nullable: bool
     ccsid: int | None
+    length: int | None
+    scale: int | None
     row_count: int
     null_count: int
     blank_count: int
@@ -25,6 +27,7 @@ class ColumnProfile:
     min_value: Any
     max_value: Any
     top_values: list[tuple[Any, int]]
+    sample_values: list[Any]
 
 
 def profile_table(table: TableData, sample_rows: int | None = None) -> list[ColumnProfile]:
@@ -74,6 +77,8 @@ def profile_column(
         data_type=meta.data_type,
         nullable=meta.nullable,
         ccsid=meta.ccsid,
+        length=meta.length,
+        scale=meta.scale,
         row_count=len(sampled),
         null_count=null_count,
         blank_count=blank_count,
@@ -81,6 +86,7 @@ def profile_column(
         min_value=min_value,
         max_value=max_value,
         top_values=top_values,
+        sample_values=list(non_null),
     )
 
 
