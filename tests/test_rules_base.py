@@ -48,7 +48,7 @@ def test_concrete_rule_detect_and_fix() -> None:
 def test_all_rules_registered_and_ignore_empty_profile() -> None:
     expected_ids = {"R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08", "R09"}
     assert {cls.id for cls in ALL_RULES} == expected_ids
-    implemented_fix_ids = {"R01"}
+    implemented_fix_ids = {"R01", "R05", "R08"}
     for cls in ALL_RULES:
         rule = cls()
         assert rule.detect({}) == []
