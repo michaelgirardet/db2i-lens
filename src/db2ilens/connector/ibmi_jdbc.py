@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import csv
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -40,6 +42,24 @@ class JdbcConfigError(ValueError):
 
 class JdbcQueryError(RuntimeError):
     """Failure while querying Db2 for i over JDBC."""
+
+
+_JDBC_SOURCE_RE = re.compile(
+    r"^jdbc:as400://(?P<host>[^/;]+)(?:/(?P<schema>[^/;]+))?",
+    re.IGNORECASE,
+)
+
+
+def parse_jdbc_source(source: str) -> tuple[str, str]:
+    """Parse ``jdbc:as400://host/SCHEMA`` scan.source into (host, schema)."""
+    match = _JDBC_SOURCE_RE.match(source.strip())
+    if match is None:
+        raise JdbcConfigError(f"unsupported JDBC source: {source!r}")
+    host = match.group("host")
+    schema = match.group("schema")
+    if not schema:
+        raise JdbcConfigError(f"JDBC source missing schema: {source!r}")
+    return host, schema.upper()
 
 
 def resolve_password(*, password_stdin: bool) -> str:
@@ -214,6 +234,60 @@ def load_jdbc_export(
         tables=tables,
         source_path=Path(f"jdbc:as400://{host}/{schema_name}"),
     )
+
+
+def write_export_csvs(export: OfflineExport, data_dir: Path) -> None:
+    """Write sampled table rows as CSV files for dbt-duckdb external sources."""
+    data_dir.mkdir(parents=True, exist_ok=True)
+    for table in export.tables.values():
+        path = data_dir / f"{table.name}.csv"
+        fieldnames = [column.name for column in table.columns]
+        with path.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            for row in table.rows:
+                writer.writerow(
+                    {
+                        name: "" if row.get(name) is None else row.get(name)
+                        for name in fieldnames
+                    }
+                )
+
+
+def materialize_jdbc_scan_csvs(scan: dict[str, Any], data_dir: Path) -> None:
+    """
+    Re-fetch JDBC sample rows into ``data_dir`` for a jdbc-mode scan artifact.
+
+    Credentials: DB2ILENS_USER / PUB400_USER and DB2ILENS_PASSWORD / PUB400_PASSWORD.
+    """
+    if str(scan.get("mode", "")).lower() != "jdbc":
+        return
+    user = os.environ.get("DB2ILENS_USER") or os.environ.get("PUB400_USER")
+    password = os.environ.get("DB2ILENS_PASSWORD") or os.environ.get("PUB400_PASSWORD")
+    if not user or not password:
+        raise JdbcConfigError(
+            "jdbc scan needs DB2ILENS_USER/PUB400_USER and "
+            "DB2ILENS_PASSWORD/PUB400_PASSWORD to materialize CSV data for dbt"
+        )
+    host, schema = parse_jdbc_source(str(scan.get("source", "")))
+    sample_rows = int(scan.get("sample_rows") or 5000)
+    export = load_jdbc_export(
+        host=host,
+        user=user,
+        password=password,
+        schema=schema,
+        sample_rows=sample_rows,
+    )
+    # Only keep tables present in the scan document (stable subset).
+    wanted = {str(table.get("name", "")) for table in scan.get("tables", [])}
+    filtered = OfflineExport(
+        schema_name=export.schema_name,
+        tables={
+            name: table for name, table in export.tables.items() if name in wanted
+        },
+        source_path=export.source_path,
+    )
+    write_export_csvs(filtered, data_dir)
 
 
 def _list_tables(connection: Any, schema: str) -> list[str]:

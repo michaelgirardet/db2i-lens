@@ -10,6 +10,7 @@ from typing import Any
 import yaml
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 
+from db2ilens.connector.ibmi_jdbc import materialize_jdbc_scan_csvs
 from db2ilens.dbtgen.context import ProjectContext, build_project_context
 from db2ilens.scan import validate_scan_document
 
@@ -58,6 +59,8 @@ def generate_dbt_project(scan_path: Path, out_dir: Path, target: str = "duckdb")
         )
 
     _copy_offline_data(scan, data_dir, context)
+    if str(scan.get("mode", "")).lower() == "jdbc" and not any(data_dir.glob("*.csv")):
+        materialize_jdbc_scan_csvs(scan, data_dir)
 
 
 def _jinja_env() -> Environment:

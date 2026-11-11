@@ -5,8 +5,11 @@ from db2ilens.connector.ibmi_jdbc import (
     JdbcQueryError,
     load_jdbc_export,
     map_syscolumns2_row,
+    materialize_jdbc_scan_csvs,
+    parse_jdbc_source,
     resolve_jt400_jar,
     resolve_password,
+    write_export_csvs,
 )
 from db2ilens.connector.offline import (
     ColumnMeta,
@@ -26,6 +29,9 @@ __all__ = [
     "load_export",
     "load_jdbc_export",
     "map_syscolumns2_row",
+    "materialize_jdbc_scan_csvs",
+    "parse_jdbc_source",
     "resolve_jt400_jar",
     "resolve_password",
+    "write_export_csvs",
 ]

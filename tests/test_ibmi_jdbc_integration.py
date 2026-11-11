@@ -8,14 +8,18 @@ import pytest
 
 from db2ilens.connector.ibmi_jdbc import JdbcConfigError, load_jdbc_export
 
-_HAS_PUB400 = bool(os.environ.get("PUB400_USER") and os.environ.get("PUB400_PASSWORD"))
+_HAS_PUB400 = bool(
+    (os.environ.get("PUB400_USER") or os.environ.get("DB2ILENS_USER"))
+    and (os.environ.get("PUB400_PASSWORD") or os.environ.get("DB2ILENS_PASSWORD"))
+)
 
 
+@pytest.mark.integration
 @pytest.mark.skipif(not _HAS_PUB400, reason="PUB400_USER/PUB400_PASSWORD not configured")
 def test_jdbc_load_export_returns_offline_compatible_structure() -> None:
-    user = os.environ["PUB400_USER"]
-    password = os.environ["PUB400_PASSWORD"]
-    schema = os.environ.get("PUB400_SCHEMA", user)
+    user = os.environ.get("PUB400_USER") or os.environ["DB2ILENS_USER"]
+    password = os.environ.get("PUB400_PASSWORD") or os.environ["DB2ILENS_PASSWORD"]
+    schema = os.environ.get("PUB400_SCHEMA") or os.environ.get("DB2ILENS_SCHEMA") or user
     host = os.environ.get("PUB400_HOST", "pub400.com")
 
     try:

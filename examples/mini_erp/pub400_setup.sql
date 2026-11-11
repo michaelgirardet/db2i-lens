@@ -2,14 +2,21 @@
 -- Db2iLens mini-ERP — setup PUB400 / ACS "Run SQL Scripts"
 -- =============================================================================
 -- 1. Create a free account on https://pub400.com and wait for activation.
--- 2. Replace YOUR_LIBRARY below with your personal library (often = user profile).
+-- 2. Prefer a dedicated demo schema so you do not drop existing tables:
+--      CREATE SCHEMA DEMO_LENS;
+--    Then replace YOUR_LIBRARY below with DEMO_LENS (recommended).
+--    Using your personal library (e.g. DUCSVEN1) will DROP CLIENTS/COMMANDES/…
+--    if those names already exist.
 -- 3. Connect ACS → Run SQL Scripts to pub400.com, then run this whole script.
 -- 4. Scan with:
+--      export JT400_JAR=$HOME/.db2ilens/jt400.jar
 --      export DB2ILENS_PASSWORD='...'
---      db2ilens scan --host pub400.com --user YOUR_USER --schema YOUR_LIBRARY \
---        --password-stdin --out scan.yaml <<< "$DB2ILENS_PASSWORD"
+--      db2ilens scan --host pub400.com --user YOUR_USER --schema DEMO_LENS \
+--        --out scan.yaml
 --
 -- Intentionally embeds R01–R08 traps (CCSID 65535, CYYMMDD, blanks, etc.).
+-- Note: R04 (implied decimal scale) is offline-schema-only — SYSCOLUMNS2 has
+-- no implied_scale, so JDBC scans will not raise R04 on PRC.
 -- =============================================================================
 
 SET SCHEMA YOUR_LIBRARY;

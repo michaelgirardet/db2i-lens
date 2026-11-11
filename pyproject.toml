@@ -81,3 +81,7 @@ disallow_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+addopts = "-m 'not integration'"
+markers = [
+    "integration: live PUB400 / external system tests (excluded from default CI)",
+]

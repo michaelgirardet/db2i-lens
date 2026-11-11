@@ -6,6 +6,7 @@ from db2ilens.connector.ibmi_jdbc import (
     JdbcConfigError,
     map_syscolumns2_row,
     normalize_ibm_data_type,
+    parse_jdbc_source,
     resolve_jt400_jar,
     resolve_password,
 )
@@ -90,6 +91,13 @@ def test_normalize_ibm_data_types() -> None:
     assert normalize_ibm_data_type("CHARACTER") == "CHAR"
     assert normalize_ibm_data_type("CHARACTER VARYING") == "VARCHAR"
     assert normalize_ibm_data_type("DECIMAL") == "DECIMAL"
+
+
+def test_parse_jdbc_source() -> None:
+    host, schema = parse_jdbc_source("jdbc:as400://pub400.com/DEMO_LENS")
+    assert host == "pub400.com"
+    assert schema == "DEMO_LENS"
+
 
 
 def test_resolve_password_prefers_env(monkeypatch) -> None:  # type: ignore[no-untyped-def]
