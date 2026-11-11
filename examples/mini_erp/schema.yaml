@@ -22,6 +22,12 @@ tables:
         nullable: false
         ccsid: 37
         comment: null  # R08 — Y/N flag
+      PHNNUM:
+        data_type: DECIMAL
+        length: 8
+        scale: 0
+        nullable: false
+        comment: null  # R01 negative — DEC(8,0) phone numbers, not dates
   COMMANDES:
     columns:
       ORDID:
@@ -107,7 +113,7 @@ tables:
         nullable: false
         comment: null  # R09 — zero sentinel
 traps:
-  R01: "COMMANDES.ORDDTE — DEC(8,0) YYYYMMDD"
+  R01: "COMMANDES.ORDDTE — DEC(8,0) YYYYMMDD; CLIENTS.PHNNUM is DEC(8,0) non-date counter-example"
   R02: "ARTICLES.CRTDTE — DEC(7,0) CYYMMDD"
   R03: "CLIENTS.CUSNAME — CCSID 65535"
   R04: "LIGNES_CMD.PRC — packed cents as DEC(9,0)"

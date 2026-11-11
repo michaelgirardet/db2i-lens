@@ -22,7 +22,7 @@ def test_load_export_exposes_column_metadata_from_schema_yaml() -> None:
     export = load_export(FIXTURE_DIR)
     clients = export.tables["CLIENTS"]
 
-    assert [c.name for c in clients.columns] == ["CUSID", "CUSNAME", "ACTFLG"]
+    assert [c.name for c in clients.columns] == ["CUSID", "CUSNAME", "ACTFLG", "PHNNUM"]
     cusname = clients.columns[1]
     assert cusname.data_type == "CHAR"
     assert cusname.length == 30

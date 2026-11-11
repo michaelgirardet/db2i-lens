@@ -64,6 +64,6 @@ def test_profile_table_returns_one_profile_per_column() -> None:
     export = load_export(FIXTURE_DIR)
     profiles = profile_table(export.tables["CLIENTS"])
 
-    assert [p.column for p in profiles] == ["CUSID", "CUSNAME", "ACTFLG"]
+    assert [p.column for p in profiles] == ["CUSID", "CUSNAME", "ACTFLG", "PHNNUM"]
     assert all(p.data_type for p in profiles)
     assert profiles[1].ccsid == 65535

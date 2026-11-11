@@ -52,3 +52,19 @@ def test_r01_does_not_flag_cyymmdd_crtdte() -> None:
     findings = NumericDateYYYYMMDDRule().detect(profile)
 
     assert findings == []
+
+
+def test_r01_does_not_flag_non_date_dec8_phnnum() -> None:
+    """DEC(8,0) phone numbers must not be mistaken for YYYYMMDD dates."""
+    export = load_export(FIXTURE_DIR)
+    profile = profile_column(export.tables["CLIENTS"], "PHNNUM")
+
+    assert profile.length == 8
+    assert profile.scale == 0
+    assert profile.data_type == "DECIMAL"
+    # Sanity: values are 8-digit numbers that are NOT valid calendar dates.
+    assert all(isinstance(v, int) and len(f"{v:08d}") == 8 for v in profile.sample_values)
+
+    findings = NumericDateYYYYMMDDRule().detect(profile)
+
+    assert findings == []

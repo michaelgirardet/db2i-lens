@@ -8,6 +8,7 @@ volontairement les pièges legacy du catalogue Db2iLens.
 | Règle | Table.colonne | Description |
 |---|---|---|
 | R01 | `COMMANDES.ORDDTE` | Date numérique `DEC(8,0)` au format `YYYYMMDD` |
+| R01− | `CLIENTS.PHNNUM` | Contre-exemple : `DEC(8,0)` téléphone, **pas** une date |
 | R02 | `ARTICLES.CRTDTE` | Date IBM `CYYMMDD` sur `DEC(7,0)` |
 | R03 | `CLIENTS.CUSNAME` | `CCSID 65535` déclaré dans `schema.yaml` |
 | R04 | `LIGNES_CMD.PRC` | Prix en centimes stocké en `DEC(9,0)` sans échelle |
