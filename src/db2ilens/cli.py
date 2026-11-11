@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from db2ilens.report.markdown import render_markdown
 from db2ilens.scan import scan_offline, write_scan_yaml
 
 _NOT_IMPLEMENTED = "not implemented yet — coming in a later phase"
@@ -84,7 +85,7 @@ def scan(
 
 
 @cli.command("report")
-@click.argument("scan_file", type=click.Path(exists=False, path_type=Path))
+@click.argument("scan_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.option(
     "--format",
     "fmt",
@@ -103,8 +104,16 @@ def scan(
 )
 def report(scan_file: Path, fmt: str, out_path: Path) -> None:
     """Generate a discovery report from a scan.yaml artifact."""
-    _ = (scan_file, fmt, out_path)
-    click.echo(_NOT_IMPLEMENTED, err=True)
+    normalized = fmt.lower()
+    if normalized == "markdown":
+        render_markdown(scan_file, out_path)
+        click.echo(f"Wrote Markdown report to {out_path}")
+        return
+
+    click.echo(
+        f"Report format {fmt!r} is not implemented yet (try --format markdown).",
+        err=True,
+    )
     raise SystemExit(1)
 
 
