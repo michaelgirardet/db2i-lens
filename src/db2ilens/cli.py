@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import click
 
-_NOT_IMPLEMENTED = "not implemented in P0 — coming in a later phase"
+from db2ilens.scan import scan_offline, write_scan_yaml
+
+_NOT_IMPLEMENTED = "not implemented yet — coming in a later phase"
 
 
 @click.group()
@@ -23,7 +26,10 @@ def cli() -> None:
     "--password-stdin",
     is_flag=True,
     default=False,
-    help="Read password from stdin (or use DB2ILENS_PASSWORD).",
+    help=(
+        "Read password from stdin (or use DB2ILENS_PASSWORD). "
+        "Ignored in --offline mode."
+    ),
 )
 @click.option(
     "--sample-rows",
@@ -56,8 +62,24 @@ def scan(
     out_path: Path,
 ) -> None:
     """Scan an IBM i schema or an offline export (one pass → scan.yaml)."""
-    _ = (host, user, schema, password_stdin, sample_rows, offline, out_path)
-    click.echo(_NOT_IMPLEMENTED, err=True)
+    if offline is not None:
+        if password_stdin:
+            # Consume stdin so pipes don't hang; value is intentionally unused offline.
+            sys.stdin.readline()
+        result = scan_offline(offline, sample_rows=sample_rows)
+        write_scan_yaml(result, out_path)
+        click.echo(
+            f"Wrote {out_path} "
+            f"({result.summary.table_count} tables, "
+            f"{result.summary.finding_count} findings)"
+        )
+        return
+
+    _ = (host, user, schema, password_stdin, sample_rows, out_path)
+    click.echo(
+        "JDBC mode is not implemented yet; use --offline PATH for local scans.",
+        err=True,
+    )
     raise SystemExit(1)
 
 

@@ -39,8 +39,8 @@ def test_gen_dbt_help() -> None:
     assert "--target" in result.output
 
 
-def test_scan_not_implemented() -> None:
+def test_scan_jdbc_mode_not_implemented() -> None:
     runner = CliRunner()
-    result = runner.invoke(cli, ["scan", "--offline", "examples/mini_erp"])
+    result = runner.invoke(cli, ["scan", "--host", "example.com", "--user", "QUSER"])
     assert result.exit_code == 1
-    assert "not implemented in P0" in result.output
+    assert "JDBC mode is not implemented" in result.output
