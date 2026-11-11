@@ -18,6 +18,7 @@ class ColumnProfile:
     data_type: str
     nullable: bool
     ccsid: int | None
+    comment: str | None
     length: int | None
     scale: int | None
     implied_scale: int | None
@@ -78,6 +79,7 @@ def profile_column(
         data_type=meta.data_type,
         nullable=meta.nullable,
         ccsid=meta.ccsid,
+        comment=meta.comment,
         length=meta.length,
         scale=meta.scale,
         implied_scale=meta.implied_scale,

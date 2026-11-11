@@ -100,7 +100,7 @@ tables:
         length: 40
         nullable: false
         ccsid: 37
-        comment: null  # R06 — short obscure name
+        comment: "Article description"  # R06 counter-example — documented name
       CRTDTE:
         data_type: DECIMAL
         length: 7
@@ -119,7 +119,7 @@ traps:
   R03: "CLIENTS.CUSNAME — CCSID 65535; CLIENTS.CUSID CCSID 37 is counter-example"
   R04: "LIGNES_CMD.PRC — implied_scale 2; LIGNES_CMD.QTY is integer counter-example"
   R05: "CLIENTS.CUSNAME — blanks instead of NULL"
-  R06: "ARTICLES.ARTDESC — ≤10-char name, no comment"
-  R07: "LIGNES_CMD.TAGS — comma/pipe separated values"
+  R06: "short CHAR names without comment (ARTDESC has comment and is a counter-example)"
+  R07: "LIGNES_CMD.TAGS — recurring '|' separator; ARTDESC is counter-example"
   R08: "CLIENTS.ACTFLG — Y/N flag"
   R09: "ARTICLES.STDPRC — zero as sentinel"

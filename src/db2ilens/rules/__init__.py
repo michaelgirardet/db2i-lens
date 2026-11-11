@@ -9,6 +9,7 @@ from db2ilens.rules.naming_rules import (
     MultiValueColumnRule,
     ObscureShortNameRule,
     YnFlagRule,
+    suggest_long_name,
 )
 from db2ilens.rules.numeric_rules import ImplicitPackedDecimalRule, ZeroSentinelRule
 
@@ -43,4 +44,5 @@ __all__ = [
     "Severity",
     "YnFlagRule",
     "ZeroSentinelRule",
+    "suggest_long_name",
 ]

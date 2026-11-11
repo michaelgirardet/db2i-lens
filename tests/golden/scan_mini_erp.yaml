@@ -7,11 +7,11 @@ sample_rows: 5000
 summary:
   table_count: 4
   column_count: 17
-  finding_count: 6
+  finding_count: 17
   findings_by_severity:
     critical: 1
-    warning: 4
-    info: 1
+    warning: 5
+    info: 11
 tables:
 - name: ARTICLES
   columns:
@@ -43,7 +43,15 @@ tables:
         count: 1
       - value: A500
         count: 1
-    findings: []
+    findings:
+    - rule_id: R06
+      severity: info
+      message: Column ARTICLES.ARTID has an obscure short name
+      evidence:
+        column_name: ARTID
+        suggested_name: article_identifier
+        decoded: true
+      suggested_fix: article_identifier
   - name: ARTDESC
     metadata:
       name: ARTDESC
@@ -53,7 +61,7 @@ tables:
       implied_scale: null
       nullable: false
       ccsid: 37
-      comment: null
+      comment: Article description
     stats:
       row_count: 5
       null_count: 0
@@ -177,7 +185,15 @@ tables:
         count: 1
       - value: C0005
         count: 1
-    findings: []
+    findings:
+    - rule_id: R06
+      severity: info
+      message: Column CLIENTS.CUSID has an obscure short name
+      evidence:
+        column_name: CUSID
+        suggested_name: customer_identifier
+        decoded: true
+      suggested_fix: customer_identifier
   - name: CUSNAME
     metadata:
       name: CUSNAME
@@ -224,6 +240,14 @@ tables:
         blank_ratio: 0.4
         threshold: 0.2
       suggested_fix: NULLIF(TRIM(CUSNAME), '')
+    - rule_id: R06
+      severity: info
+      message: Column CLIENTS.CUSNAME has an obscure short name
+      evidence:
+        column_name: CUSNAME
+        suggested_name: customer_name
+        decoded: true
+      suggested_fix: customer_name
   - name: ACTFLG
     metadata:
       name: ACTFLG
@@ -247,6 +271,14 @@ tables:
       - value: N
         count: 2
     findings:
+    - rule_id: R06
+      severity: info
+      message: Column CLIENTS.ACTFLG has an obscure short name
+      evidence:
+        column_name: ACTFLG
+        suggested_name: active_flag
+        decoded: true
+      suggested_fix: active_flag
     - rule_id: R08
       severity: info
       message: Column CLIENTS.ACTFLG looks like a binary flag (['N', 'Y'])
@@ -317,7 +349,15 @@ tables:
         count: 1
       - value: O1005
         count: 1
-    findings: []
+    findings:
+    - rule_id: R06
+      severity: info
+      message: Column COMMANDES.ORDID has an obscure short name
+      evidence:
+        column_name: ORDID
+        suggested_name: order_identifier
+        decoded: true
+      suggested_fix: order_identifier
   - name: CUSID
     metadata:
       name: CUSID
@@ -344,7 +384,15 @@ tables:
         count: 1
       - value: C0005
         count: 1
-    findings: []
+    findings:
+    - rule_id: R06
+      severity: info
+      message: Column COMMANDES.CUSID has an obscure short name
+      evidence:
+        column_name: CUSID
+        suggested_name: customer_identifier
+        decoded: true
+      suggested_fix: customer_identifier
   - name: ORDDTE
     metadata:
       name: ORDDTE
@@ -408,7 +456,15 @@ tables:
         count: 1
       - value: X
         count: 1
-    findings: []
+    findings:
+    - rule_id: R06
+      severity: info
+      message: Column COMMANDES.ORDSTS has an obscure short name
+      evidence:
+        column_name: ORDSTS
+        suggested_name: order_status
+        decoded: true
+      suggested_fix: order_status
 - name: LIGNES_CMD
   columns:
   - name: ORDID
@@ -439,7 +495,15 @@ tables:
         count: 1
       - value: O1005
         count: 1
-    findings: []
+    findings:
+    - rule_id: R06
+      severity: info
+      message: Column LIGNES_CMD.ORDID has an obscure short name
+      evidence:
+        column_name: ORDID
+        suggested_name: order_identifier
+        decoded: true
+      suggested_fix: order_identifier
   - name: ARTID
     metadata:
       name: ARTID
@@ -464,7 +528,15 @@ tables:
         count: 2
       - value: A300
         count: 1
-    findings: []
+    findings:
+    - rule_id: R06
+      severity: info
+      message: Column LIGNES_CMD.ARTID has an obscure short name
+      evidence:
+        column_name: ARTID
+        suggested_name: article_identifier
+        decoded: true
+      suggested_fix: article_identifier
   - name: QTY
     metadata:
       name: QTY
@@ -562,4 +634,22 @@ tables:
         count: 1
       - value: spare
         count: 1
-    findings: []
+    findings:
+    - rule_id: R06
+      severity: info
+      message: Column LIGNES_CMD.TAGS has an undecoded short name
+      evidence:
+        column_name: TAGS
+        suggested_name: null
+        decoded: false
+      suggested_fix: null
+    - rule_id: R07
+      severity: warning
+      message: Column LIGNES_CMD.TAGS looks multi-valued (separator '|' in 33% of
+        samples)
+      evidence:
+        separator: '|'
+        frequency: 0.3333333333333333
+        threshold: 0.25
+        sample_size: 6
+      suggested_fix: null

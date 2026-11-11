@@ -1,0 +1,23 @@
+# Enrichable IBM i column-name abbreviation dictionary.
+# Keys are matched greedily (longest first) against uppercase column names.
+CST: customer
+CUS: customer
+ORD: order
+ART: article
+DTE: date
+PRC: price
+STD: standard
+QTY: quantity
+AMT: amount
+NAM: name
+NAME: name
+FLG: flag
+ID: identifier
+NM: name
+DESC: description
+CRT: created
+ACT: active
+STS: status
+CMD: order_line
+PHN: phone
+NUM: number

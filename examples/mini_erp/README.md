@@ -16,8 +16,10 @@ volontairement les pièges legacy du catalogue Db2iLens.
 | R04 | `LIGNES_CMD.PRC` | Prix packé : `scale: 0` + `implied_scale: 2` |
 | R04− | `LIGNES_CMD.QTY` | Contre-exemple : entier sans `implied_scale` |
 | R05 | `CLIENTS.CUSNAME` | Blancs / chaînes vides à la place de NULL |
-| R06 | `ARTICLES.ARTDESC` | Nom ≤ 10 caractères, sans commentaire |
-| R07 | `LIGNES_CMD.TAGS` | Valeurs multi-séparateurs (`,` et `\|`) |
+| R06 | colonnes CHAR courtes | Noms ≤ 10 chars sans commentaire (ex. `CUSNAME` → `customer_name`) |
+| R06− | `ARTICLES.ARTDESC` | Contre-exemple : `comment: "Article description"` |
+| R07 | `LIGNES_CMD.TAGS` | Séparateur récurrent `\|` |
+| R07− | `ARTICLES.ARTDESC` | Contre-exemple : texte libre sans séparateur |
 | R08 | `CLIENTS.ACTFLG` | Drapeau `Y`/`N` sur `CHAR(1)` |
 | R09 | `ARTICLES.STDPRC` | Zéro sentinelle fréquent |
 
