@@ -7,10 +7,11 @@ from pathlib import Path
 
 import click
 
+from db2ilens.connector.ibmi_jdbc import JdbcConfigError, resolve_password
 from db2ilens.dbtgen import generate_dbt_project
 from db2ilens.report.html import render_html
 from db2ilens.report.markdown import render_markdown
-from db2ilens.scan import scan_offline, write_scan_yaml
+from db2ilens.scan import scan_jdbc, scan_offline, write_scan_yaml
 
 
 @click.group()
@@ -76,12 +77,33 @@ def scan(
         )
         return
 
-    _ = (host, user, schema, password_stdin, sample_rows, out_path)
+    if not host or not user or not schema:
+        click.echo(
+            "JDBC mode requires --host, --user, and --schema "
+            "(or use --offline PATH).",
+            err=True,
+        )
+        raise SystemExit(2)
+
+    try:
+        password = resolve_password(password_stdin=password_stdin)
+        result = scan_jdbc(
+            host=host,
+            user=user,
+            password=password,
+            schema=schema,
+            sample_rows=sample_rows,
+        )
+    except (JdbcConfigError, OSError, RuntimeError) as exc:
+        click.echo(str(exc), err=True)
+        raise SystemExit(1) from exc
+
+    write_scan_yaml(result, out_path)
     click.echo(
-        "JDBC mode is not implemented yet; use --offline PATH for local scans.",
-        err=True,
+        f"Wrote {out_path} "
+        f"({result.summary.table_count} tables, "
+        f"{result.summary.finding_count} findings)"
     )
-    raise SystemExit(1)
 
 
 @cli.command("report")

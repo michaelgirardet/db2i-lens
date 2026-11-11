@@ -39,8 +39,27 @@ def test_gen_dbt_help() -> None:
     assert "--target" in result.output
 
 
-def test_scan_jdbc_mode_not_implemented() -> None:
+def test_scan_jdbc_requires_host_user_schema() -> None:
     runner = CliRunner()
     result = runner.invoke(cli, ["scan", "--host", "example.com", "--user", "QUSER"])
+    assert result.exit_code == 2
+    assert "--schema" in result.output
+
+
+def test_scan_jdbc_requires_password(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.delenv("DB2ILENS_PASSWORD", raising=False)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "scan",
+            "--host",
+            "example.com",
+            "--user",
+            "QUSER",
+            "--schema",
+            "DEMO_LIB",
+        ],
+    )
     assert result.exit_code == 1
-    assert "JDBC mode is not implemented" in result.output
+    assert "password" in result.output.lower()

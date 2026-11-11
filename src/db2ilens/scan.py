@@ -9,6 +9,7 @@ from typing import Any
 
 import yaml
 
+from db2ilens.connector.ibmi_jdbc import load_jdbc_export
 from db2ilens.connector.offline import ColumnMeta, OfflineExport, TableData, load_export
 from db2ilens.profiler.sampling import ColumnProfile, profile_table
 from db2ilens.rules import RULES
@@ -155,6 +156,32 @@ def scan_offline(path: Path, sample_rows: int = 5000) -> ScanResult:
         export=export,
         mode="offline",
         source=str(path.resolve()),
+        sample_rows=sample_rows,
+    )
+
+
+def scan_jdbc(
+    *,
+    host: str,
+    user: str,
+    password: str,
+    schema: str,
+    sample_rows: int = 5000,
+    jar_path: Path | None = None,
+) -> ScanResult:
+    """Profile an IBM i schema over JDBC and run the registered detection rules."""
+    export = load_jdbc_export(
+        host=host,
+        user=user,
+        password=password,
+        schema=schema,
+        sample_rows=sample_rows,
+        jar_path=jar_path,
+    )
+    return build_scan_result(
+        export=export,
+        mode="jdbc",
+        source=f"jdbc:as400://{host}/{schema.strip().upper()}",
         sample_rows=sample_rows,
     )
 

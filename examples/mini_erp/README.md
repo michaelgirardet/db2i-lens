@@ -23,7 +23,7 @@ volontairement les pièges legacy du catalogue Db2iLens.
 | R08 | `CLIENTS.ACTFLG` | Drapeau `Y`/`N` sur `CHAR(1)` |
 | R09 | `ARTICLES.STDPRC` | Zéro sentinelle fréquent |
 
-## Usage prévu (P1+)
+## Usage offline
 
 ```bash
 db2ilens scan --offline examples/mini_erp/ --out scan.yaml
@@ -31,3 +31,17 @@ db2ilens scan --offline examples/mini_erp/ --out scan.yaml
 
 Les fichiers CSV + `schema.yaml` sont la source de vérité pour les tests offline
 (`tests/fixtures/mini_erp/` est une copie miroir utilisée par pytest).
+
+## Usage PUB400 (ACS)
+
+1. Compte gratuit sur [pub400.com](https://pub400.com)
+2. Éditer `YOUR_LIBRARY` dans [`pub400_setup.sql`](pub400_setup.sql)
+3. Exécuter le script dans ACS → *Run SQL Scripts*
+4. Scanner (voir aussi `docs/JT400.md`) :
+
+```bash
+./scripts/fetch_jt400.sh
+export JT400_JAR="$HOME/.db2ilens/jt400.jar"
+export DB2ILENS_PASSWORD='…'
+db2ilens scan --host pub400.com --user YOUR_USER --schema YOUR_LIBRARY --out scan.yaml
+```
