@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from db2ilens.report.html import render_html
 from db2ilens.report.markdown import render_markdown
 from db2ilens.scan import scan_offline, write_scan_yaml
 
@@ -110,10 +111,12 @@ def report(scan_file: Path, fmt: str, out_path: Path) -> None:
         click.echo(f"Wrote Markdown report to {out_path}")
         return
 
-    click.echo(
-        f"Report format {fmt!r} is not implemented yet (try --format markdown).",
-        err=True,
-    )
+    if normalized == "html":
+        render_html(scan_file, out_path)
+        click.echo(f"Wrote HTML report to {out_path}")
+        return
+
+    click.echo(f"Report format {fmt!r} is not supported.", err=True)
     raise SystemExit(1)
 
 
