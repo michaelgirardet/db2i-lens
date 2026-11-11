@@ -1,0 +1,118 @@
+# Mini-ERP schema mirroring IBM i QSYS2.SYSCOLUMNS2-style metadata.
+# Intentionally embeds legacy quirks R01–R09 for offline rule tests.
+schema: DEMO_LIB
+tables:
+  CLIENTS:
+    columns:
+      CUSID:
+        data_type: CHAR
+        length: 10
+        nullable: false
+        ccsid: 37
+        comment: null
+      CUSNAME:
+        data_type: CHAR
+        length: 30
+        nullable: false
+        ccsid: 65535  # R03 — CCSID 65535 (binary / EBCDIC)
+        comment: null
+      ACTFLG:
+        data_type: CHAR
+        length: 1
+        nullable: false
+        ccsid: 37
+        comment: null  # R08 — Y/N flag
+  COMMANDES:
+    columns:
+      ORDID:
+        data_type: CHAR
+        length: 10
+        nullable: false
+        ccsid: 37
+        comment: null
+      CUSID:
+        data_type: CHAR
+        length: 10
+        nullable: false
+        ccsid: 37
+        comment: null
+      ORDDTE:
+        data_type: DECIMAL
+        length: 8
+        scale: 0
+        nullable: false
+        comment: null  # R01 — numeric YYYYMMDD
+      ORDSTS:
+        data_type: CHAR
+        length: 1
+        nullable: false
+        ccsid: 37
+        comment: null
+  LIGNES_CMD:
+    columns:
+      ORDID:
+        data_type: CHAR
+        length: 10
+        nullable: false
+        ccsid: 37
+        comment: null
+      ARTID:
+        data_type: CHAR
+        length: 10
+        nullable: false
+        ccsid: 37
+        comment: null
+      QTY:
+        data_type: DECIMAL
+        length: 7
+        scale: 0
+        nullable: false
+        comment: null
+      PRC:
+        data_type: DECIMAL
+        length: 9
+        scale: 0
+        nullable: false
+        comment: null  # R04 — packed-style cents without scale
+      TAGS:
+        data_type: VARCHAR
+        length: 50
+        nullable: true
+        ccsid: 37
+        comment: null  # R07 — multi-value with separators
+  ARTICLES:
+    columns:
+      ARTID:
+        data_type: CHAR
+        length: 10
+        nullable: false
+        ccsid: 37
+        comment: null
+      ARTDESC:
+        data_type: CHAR
+        length: 40
+        nullable: false
+        ccsid: 37
+        comment: null  # R06 — short obscure name
+      CRTDTE:
+        data_type: DECIMAL
+        length: 7
+        scale: 0
+        nullable: false
+        comment: null  # R02 — IBM CYYMMDD
+      STDPRC:
+        data_type: DECIMAL
+        length: 9
+        scale: 0
+        nullable: false
+        comment: null  # R09 — zero sentinel
+traps:
+  R01: "COMMANDES.ORDDTE — DEC(8,0) YYYYMMDD"
+  R02: "ARTICLES.CRTDTE — DEC(7,0) CYYMMDD"
+  R03: "CLIENTS.CUSNAME — CCSID 65535"
+  R04: "LIGNES_CMD.PRC — packed cents as DEC(9,0)"
+  R05: "CLIENTS.CUSNAME — blanks instead of NULL"
+  R06: "ARTICLES.ARTDESC — ≤10-char name, no comment"
+  R07: "LIGNES_CMD.TAGS — comma/pipe separated values"
+  R08: "CLIENTS.ACTFLG — Y/N flag"
+  R09: "ARTICLES.STDPRC — zero as sentinel"
