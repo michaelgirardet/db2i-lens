@@ -1,0 +1,16 @@
+name: {{ project_name }}
+version: 1.0.0
+config-version: 2
+profile: {{ profile_name }}
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  {{ project_name }}:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

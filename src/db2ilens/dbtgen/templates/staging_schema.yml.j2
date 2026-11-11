@@ -1,0 +1,12 @@
+version: 2
+
+models:
+{% for table in tables %}
+  - name: {{ table.staging_name }}
+    description: "Staging (raw types) for {{ table.name }}"
+    columns:
+{% for column in table.columns %}
+      - name: {{ column.name }}
+        description: "Raw {{ column.data_type }}"
+{% endfor %}
+{% endfor %}

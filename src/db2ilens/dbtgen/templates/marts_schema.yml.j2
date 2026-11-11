@@ -1,0 +1,27 @@
+version: 2
+
+models:
+{% for table in tables %}
+  - name: {{ table.model_name }}
+    description: "Cleaned mart for {{ table.name }}"
+    columns:
+{% for column in table.columns %}
+      - name: {{ column.output_name }}
+        description: "Source column {{ column.name }}"
+{% if column.is_key or column.accepted_values or column.relationship_targets %}
+        tests:
+{% if column.is_key %}
+          - not_null
+{% endif %}
+{% if column.accepted_values %}
+          - accepted_values:
+              values: [{% for value in column.accepted_values %}'{{ value }}'{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+{% for to_model, field in column.relationship_targets %}
+          - relationships:
+              to: ref('{{ to_model }}')
+              field: {{ field }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endfor %}

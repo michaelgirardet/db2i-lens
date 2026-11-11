@@ -1,0 +1,7 @@
+{{ profile_name }}:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ project_name }}.duckdb"
+      threads: 4

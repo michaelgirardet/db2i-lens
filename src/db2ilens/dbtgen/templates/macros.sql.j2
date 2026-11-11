@@ -1,0 +1,37 @@
+{# DuckDB-oriented cleaning expressions. SQL lives only in templates. #}
+{% macro mart_column_expr(column) -%}
+{%- set rules = column.cleaning_rules -%}
+{%- if 'R01' in rules -%}
+strptime(cast({{ column.name }} as varchar), '%Y%m%d')::date
+{%- elif 'R02' in rules -%}
+case
+  when substr(lpad(cast({{ column.name }} as varchar), 7, '0'), 1, 1) = '0'
+    then strptime(
+      '19' || substr(lpad(cast({{ column.name }} as varchar), 7, '0'), 2, 6),
+      '%Y%m%d'
+    )
+  else strptime(
+    '20' || substr(lpad(cast({{ column.name }} as varchar), 7, '0'), 2, 6),
+    '%Y%m%d'
+  )
+end::date
+{%- elif 'R08' in rules -%}
+case
+  when {{ column.name }} in ('Y', '1') then true
+  when {{ column.name }} in ('N', '0') then false
+end
+{%- elif 'R04' in rules -%}
+{%- set scale = column.implied_scale if column.implied_scale is not none else 2 -%}
+{%- set divisor = 10 ** scale -%}
+{%- set precision = column.length if column.length is not none else (scale + 1) -%}
+cast({{ column.name }} / {{ divisor }} as decimal({{ precision }}, {{ scale }}))
+{%- elif 'R05' in rules and 'R03' in rules -%}
+nullif(trim(cast({{ column.name }} as varchar)), '')
+{%- elif 'R05' in rules -%}
+nullif(trim({{ column.name }}), '')
+{%- elif 'R03' in rules -%}
+cast({{ column.name }} as varchar)
+{%- else -%}
+{{ column.name }}
+{%- endif -%}
+{%- endmacro %}

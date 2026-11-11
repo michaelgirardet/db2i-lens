@@ -1,0 +1,13 @@
+{% from 'macros.sql.j2' import mart_column_expr %}
+-- Mart model for {{ table.name }} — cleaned from {{ table.staging_name }}
+{% for column in table.columns %}
+{% for rule_id in column.cleaning_rules %}
+-- fix: {{ rule_id }} on {{ column.name }} → {{ column.output_name }}
+{% endfor %}
+{% endfor %}
+
+select
+{% for column in table.columns %}
+  {{ mart_column_expr(column) }} as {{ column.output_name }}{% if not loop.last %},{% endif %}
+{% endfor %}
+from {{ '{{' }} ref('{{ table.staging_name }}') {{ '}}' }}

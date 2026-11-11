@@ -7,11 +7,10 @@ from pathlib import Path
 
 import click
 
+from db2ilens.dbtgen import generate_dbt_project
 from db2ilens.report.html import render_html
 from db2ilens.report.markdown import render_markdown
 from db2ilens.scan import scan_offline, write_scan_yaml
-
-_NOT_IMPLEMENTED = "not implemented yet — coming in a later phase"
 
 
 @click.group()
@@ -121,7 +120,7 @@ def report(scan_file: Path, fmt: str, out_path: Path) -> None:
 
 
 @cli.command("gen-dbt")
-@click.argument("scan_file", type=click.Path(exists=False, path_type=Path))
+@click.argument("scan_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.option(
     "--out",
     "out_path",
@@ -139,9 +138,14 @@ def report(scan_file: Path, fmt: str, out_path: Path) -> None:
 )
 def gen_dbt(scan_file: Path, out_path: Path, target: str) -> None:
     """Generate a bronze/silver dbt project from a scan.yaml artifact."""
-    _ = (scan_file, out_path, target)
-    click.echo(_NOT_IMPLEMENTED, err=True)
-    raise SystemExit(1)
+    if target.lower() != "duckdb":
+        click.echo(
+            f"Target {target!r} is not implemented yet; use --target duckdb.",
+            err=True,
+        )
+        raise SystemExit(1)
+    generate_dbt_project(scan_file, out_path, target=target.lower())
+    click.echo(f"Wrote dbt project to {out_path}")
 
 
 if __name__ == "__main__":

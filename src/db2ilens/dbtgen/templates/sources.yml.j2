@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: {{ source_name }}
+    description: "IBM i schema {{ schema_name }} (offline CSV extract)"
+    meta:
+      external_location: "read_csv_auto('./data/{name}.csv', header=true)"
+    tables:
+{% for table in tables %}
+      - name: {{ table.name }}
+        description: "Source table {{ table.name }}"
+        columns:
+{% for column in table.columns %}
+          - name: {{ column.name }}
+            description: "{{ column.data_type }}{% if column.length %}({{ column.length }}){% endif %}"
+{% endfor %}
+{% endfor %}

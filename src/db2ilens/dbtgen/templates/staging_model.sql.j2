@@ -1,0 +1,15 @@
+-- Staging model for {{ table.name }}
+-- Findings detected:
+{% if table.findings %}
+{% for finding in table.findings %}
+-- - {{ finding.rule_id }} ({{ finding.severity }}): {{ finding.message }}
+{% endfor %}
+{% else %}
+-- - none
+{% endif %}
+
+select
+{% for column in table.columns %}
+  {{ column.name }}{% if not loop.last %},{% endif %}
+{% endfor %}
+from {{ '{{' }} source('{{ source_name }}', '{{ table.name }}') {{ '}}' }}
