@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from db2ilens.connector.ibmi_jdbc import (
     JdbcConfigError,
+    _coerce_jdbc_value,
+    build_jdbc_url,
     map_syscolumns2_row,
     normalize_ibm_data_type,
     parse_jdbc_source,
@@ -11,6 +13,7 @@ from db2ilens.connector.ibmi_jdbc import (
     resolve_jt400_jar,
     resolve_password,
 )
+from db2ilens.connector.offline import ColumnMeta
 
 
 def test_map_character_column_with_ccsid_65535() -> None:
@@ -98,6 +101,42 @@ def test_parse_jdbc_source() -> None:
     host, schema = parse_jdbc_source("jdbc:as400://pub400.com/DEMO_LENS")
     assert host == "pub400.com"
     assert schema == "DEMO_LENS"
+
+
+def test_build_jdbc_url_translates_ccsid_65535_binary() -> None:
+    url = build_jdbc_url("pub400.com", "DUCSVEN1", login_timeout_seconds=15)
+    assert "translate binary=true" in url
+    assert "libraries=DUCSVEN1" in url
+    assert "prompt=false" in url
+
+
+def test_coerce_char_strips_ibm_i_blank_padding() -> None:
+    meta = ColumnMeta(
+        name="ORDID",
+        data_type="CHAR",
+        length=10,
+        scale=None,
+        implied_scale=None,
+        nullable=False,
+        ccsid=37,
+        comment=None,
+    )
+    assert _coerce_jdbc_value("O1001     ", meta) == "O1001"
+    assert _coerce_jdbc_value("              ", meta) == ""
+
+
+def test_coerce_varchar_preserves_trailing_spaces() -> None:
+    meta = ColumnMeta(
+        name="TAGS",
+        data_type="VARCHAR",
+        length=50,
+        scale=None,
+        implied_scale=None,
+        nullable=True,
+        ccsid=37,
+        comment=None,
+    )
+    assert _coerce_jdbc_value("spare|urgent  ", meta) == "spare|urgent  "
 
 
 def test_parse_tables_filter_none_and_blank() -> None:

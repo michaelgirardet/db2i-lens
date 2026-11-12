@@ -195,6 +195,30 @@ def map_syscolumns2_row(row: dict[str, Any]) -> ColumnMeta:
     )
 
 
+def build_jdbc_url(
+    host: str,
+    schema: str,
+    *,
+    login_timeout_seconds: int = 15,
+) -> str:
+    """
+    Build a JT400 JDBC URL for read-only catalog + sample access.
+
+    ``translate binary=true`` is required so CCSID 65535 CHAR columns are
+    converted with the job CCSID (typically 37). Without it, EBCDIC blanks
+    (0x40) arrive as ``@`` and R05 blank detection never fires.
+    """
+    return (
+        f"jdbc:as400://{host}"
+        f";libraries={schema}"
+        f";prompt=false"
+        f";errors=full"
+        f";date format=iso"
+        f";translate binary=true"
+        f";login timeout={login_timeout_seconds}"
+    )
+
+
 def connect(
     *,
     host: str,
@@ -213,15 +237,7 @@ def connect(
         ) from exc
 
     jar = resolve_jt400_jar(jar_path)
-    # libraries= sets the default library list; prompt=false avoids GUI auth.
-    url = (
-        f"jdbc:as400://{host}"
-        f";libraries={schema}"
-        f";prompt=false"
-        f";errors=full"
-        f";date format=iso"
-        f";login timeout={login_timeout_seconds}"
-    )
+    url = build_jdbc_url(host, schema, login_timeout_seconds=login_timeout_seconds)
     try:
         connection = jaydebeapi.connect(
             "com.ibm.as400.access.AS400JDBCDriver",
@@ -452,7 +468,11 @@ def _coerce_jdbc_value(value: Any, meta: ColumnMeta | None) -> Any:
         if meta.scale and meta.scale > 0:
             return float(number)
         return int(number)
-    return str(value)
+    text = str(value)
+    # IBM i CHAR is blank-padded to LENGTH; strip so keys/flags match offline CSV.
+    if data_type == "CHAR":
+        return text.rstrip(" ")
+    return text
 
 
 def _java_to_python(value: Any) -> Any:
