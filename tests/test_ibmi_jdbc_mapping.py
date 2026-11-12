@@ -7,6 +7,7 @@ from db2ilens.connector.ibmi_jdbc import (
     map_syscolumns2_row,
     normalize_ibm_data_type,
     parse_jdbc_source,
+    parse_tables_filter,
     resolve_jt400_jar,
     resolve_password,
 )
@@ -98,6 +99,30 @@ def test_parse_jdbc_source() -> None:
     assert host == "pub400.com"
     assert schema == "DEMO_LENS"
 
+
+def test_parse_tables_filter_none_and_blank() -> None:
+    assert parse_tables_filter(None) is None
+    assert parse_tables_filter("") is None
+    assert parse_tables_filter("   ") is None
+
+
+def test_parse_tables_filter_like_pattern() -> None:
+    assert parse_tables_filter("MLENS_%") == "MLENS_%"
+    assert parse_tables_filter("mlens_%") == "MLENS_%"
+
+
+def test_parse_tables_filter_comma_list() -> None:
+    assert parse_tables_filter("MLENS_CLIENTS,MLENS_ARTICLES") == (
+        "MLENS_CLIENTS",
+        "MLENS_ARTICLES",
+    )
+    assert parse_tables_filter(" clients , commandes ") == ("CLIENTS", "COMMANDES")
+
+
+def test_parse_tables_filter_single_exact_name() -> None:
+    # Underscores in IBM i names must stay exact (not LIKE wildcards).
+    assert parse_tables_filter("LIGNES_CMD") == ("LIGNES_CMD",)
+    assert parse_tables_filter("mlens_clients") == ("MLENS_CLIENTS",)
 
 
 def test_resolve_password_prefers_env(monkeypatch) -> None:  # type: ignore[no-untyped-def]

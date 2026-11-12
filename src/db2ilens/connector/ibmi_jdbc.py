@@ -20,6 +20,24 @@ WHERE TABLE_SCHEMA = ?
 ORDER BY TABLE_NAME
 """
 
+_SQL_LIST_TABLES_LIKE = """
+SELECT TABLE_NAME
+FROM QSYS2.SYSTABLES
+WHERE TABLE_SCHEMA = ?
+  AND TABLE_TYPE = 'T'
+  AND TABLE_NAME LIKE ?
+ORDER BY TABLE_NAME
+"""
+
+_SQL_LIST_TABLES_EQ = """
+SELECT TABLE_NAME
+FROM QSYS2.SYSTABLES
+WHERE TABLE_SCHEMA = ?
+  AND TABLE_TYPE = 'T'
+  AND TABLE_NAME = ?
+ORDER BY TABLE_NAME
+"""
+
 _SQL_LIST_COLUMNS = """
 SELECT
     COLUMN_NAME,
@@ -34,6 +52,9 @@ WHERE TABLE_SCHEMA = ?
   AND TABLE_NAME = ?
 ORDER BY ORDINAL_POSITION
 """
+
+# Exact name list vs SQL LIKE pattern for --tables / PUB400_TABLES.
+TablesFilter = tuple[str, ...] | str
 
 
 class JdbcConfigError(ValueError):
@@ -60,6 +81,30 @@ def parse_jdbc_source(source: str) -> tuple[str, str]:
     if not schema:
         raise JdbcConfigError(f"JDBC source missing schema: {source!r}")
     return host, schema.upper()
+
+
+def parse_tables_filter(raw: str | None) -> TablesFilter | None:
+    """
+    Parse a ``--tables`` / ``PUB400_TABLES`` filter.
+
+    - ``None`` / blank → no filter (all tables in the schema).
+    - Comma-separated list → exact table names (case-insensitive → UPPER).
+    - Value containing ``%`` → SQL ``LIKE`` pattern (UPPER).
+    - Otherwise → single exact table name.
+    """
+    if raw is None:
+        return None
+    text = raw.strip()
+    if text == "":
+        return None
+    if "," in text:
+        names = tuple(
+            part.strip().upper() for part in text.split(",") if part.strip()
+        )
+        return names or None
+    if "%" in text:
+        return text.upper()
+    return (text.upper(),)
 
 
 def resolve_password(*, password_stdin: bool) -> str:
@@ -198,11 +243,14 @@ def load_jdbc_export(
     sample_rows: int = 5000,
     jar_path: Path | None = None,
     login_timeout_seconds: int = 15,
+    tables: str | None = None,
 ) -> OfflineExport:
     """
     Load schema metadata + sampled rows into the same Offline export structure.
 
     SELECT-only: SYSTABLES / SYSCOLUMNS2 for catalog, FETCH FIRST for samples.
+    ``tables`` accepts a comma-separated name list or a SQL LIKE pattern
+    (see ``parse_tables_filter``).
     """
     connection = connect(
         host=host,
@@ -213,9 +261,10 @@ def load_jdbc_export(
         login_timeout_seconds=login_timeout_seconds,
     )
     schema_name = schema.strip().upper()
+    tables_filter = parse_tables_filter(tables)
     try:
-        table_names = _list_tables(connection, schema_name)
-        tables: dict[str, TableData] = {}
+        table_names = _list_tables(connection, schema_name, tables_filter)
+        loaded: dict[str, TableData] = {}
         for table_name in table_names:
             columns = _list_columns(connection, schema_name, table_name)
             rows = _sample_rows(
@@ -225,13 +274,13 @@ def load_jdbc_export(
                 columns=columns,
                 sample_rows=sample_rows,
             )
-            tables[table_name] = TableData(name=table_name, columns=columns, rows=rows)
+            loaded[table_name] = TableData(name=table_name, columns=columns, rows=rows)
     finally:
         connection.close()
 
     return OfflineExport(
         schema_name=schema_name,
-        tables=tables,
+        tables=loaded,
         source_path=Path(f"jdbc:as400://{host}/{schema_name}"),
     )
 
@@ -271,27 +320,59 @@ def materialize_jdbc_scan_csvs(scan: dict[str, Any], data_dir: Path) -> None:
         )
     host, schema = parse_jdbc_source(str(scan.get("source", "")))
     sample_rows = int(scan.get("sample_rows") or 5000)
+    # Restrict JDBC reload to tables already present in the scan artifact.
+    wanted = sorted(
+        {
+            str(table.get("name", "")).strip().upper()
+            for table in scan.get("tables", [])
+            if str(table.get("name", "")).strip()
+        }
+    )
+    tables_arg = ",".join(wanted) if wanted else None
     export = load_jdbc_export(
         host=host,
         user=user,
         password=password,
         schema=schema,
         sample_rows=sample_rows,
+        tables=tables_arg,
     )
-    # Only keep tables present in the scan document (stable subset).
-    wanted = {str(table.get("name", "")) for table in scan.get("tables", [])}
     filtered = OfflineExport(
         schema_name=export.schema_name,
         tables={
-            name: table for name, table in export.tables.items() if name in wanted
+            name: table for name, table in export.tables.items() if name in set(wanted)
         },
         source_path=export.source_path,
     )
     write_export_csvs(filtered, data_dir)
 
 
-def _list_tables(connection: Any, schema: str) -> list[str]:
-    rows = _fetch_all(connection, _SQL_LIST_TABLES, [schema])
+def _list_tables(
+    connection: Any,
+    schema: str,
+    tables_filter: TablesFilter | None = None,
+) -> list[str]:
+    if isinstance(tables_filter, str):
+        rows = _fetch_all(connection, _SQL_LIST_TABLES_LIKE, [schema, tables_filter])
+        return _table_names_from_rows(rows)
+
+    if tables_filter is None:
+        rows = _fetch_all(connection, _SQL_LIST_TABLES, [schema])
+        return _table_names_from_rows(rows)
+
+    # Exact names: one equality query per name (stable binding, no dynamic IN).
+    names: list[str] = []
+    seen: set[str] = set()
+    for wanted in tables_filter:
+        rows = _fetch_all(connection, _SQL_LIST_TABLES_EQ, [schema, wanted])
+        for name in _table_names_from_rows(rows):
+            if name not in seen:
+                seen.add(name)
+                names.append(name)
+    return sorted(names)
+
+
+def _table_names_from_rows(rows: list[dict[str, Any]]) -> list[str]:
     names: list[str] = []
     for row in rows:
         name = row.get("TABLE_NAME")

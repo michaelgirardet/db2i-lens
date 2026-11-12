@@ -22,6 +22,7 @@ def test_jdbc_load_export_returns_offline_compatible_structure() -> None:
     schema = os.environ.get("PUB400_SCHEMA") or os.environ.get("DB2ILENS_SCHEMA") or user
     host = os.environ.get("PUB400_HOST", "pub400.com")
 
+    tables = os.environ.get("PUB400_TABLES") or "MLENS_%"
     try:
         export = load_jdbc_export(
             host=host,
@@ -29,12 +30,15 @@ def test_jdbc_load_export_returns_offline_compatible_structure() -> None:
             password=password,
             schema=schema,
             sample_rows=100,
+            tables=tables,
         )
     except JdbcConfigError as exc:
         pytest.skip(f"JT400 / JDBC not usable in this environment: {exc}")
 
     assert export.schema_name == schema.upper() or export.schema_name == schema
-    assert export.tables, "expected at least one table in PUB400 library"
+    assert export.tables, (
+        f"expected at least one table matching {tables!r} in PUB400 library {schema}"
+    )
     sample_table = next(iter(export.tables.values()))
     assert sample_table.columns
     first = sample_table.columns[0]

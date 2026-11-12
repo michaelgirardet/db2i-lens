@@ -41,6 +41,14 @@ def cli() -> None:
     help="Rows to sample per table.",
 )
 @click.option(
+    "--tables",
+    default=None,
+    help=(
+        "JDBC only: comma-separated table names, or a SQL LIKE pattern "
+        "(e.g. MLENS_%). Ignored in --offline mode."
+    ),
+)
+@click.option(
     "--offline",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     default=None,
@@ -60,6 +68,7 @@ def scan(
     schema: str | None,
     password_stdin: bool,
     sample_rows: int,
+    tables: str | None,
     offline: Path | None,
     out_path: Path,
 ) -> None:
@@ -93,6 +102,7 @@ def scan(
             password=password,
             schema=schema,
             sample_rows=sample_rows,
+            tables=tables,
         )
     except (JdbcConfigError, OSError, RuntimeError) as exc:
         click.echo(str(exc), err=True)

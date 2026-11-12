@@ -34,6 +34,10 @@ Les fichiers CSV + `schema.yaml` sont la source de vérité pour les tests offli
 
 ## Usage PUB400 (ACS)
 
+Les comptes gratuits ne peuvent pas `CREATE SCHEMA` : utilisez votre bibliothèque
+personnelle. Les tables sont préfixées `MLENS_` pour cohabiter avec d'autres
+objets ; filtrez avec `--tables MLENS_%`.
+
 1. Compte gratuit sur [pub400.com](https://pub400.com)
 2. Éditer `YOUR_LIBRARY` dans [`pub400_setup.sql`](pub400_setup.sql)
 3. Exécuter le script dans ACS → *Run SQL Scripts*
@@ -43,5 +47,6 @@ Les fichiers CSV + `schema.yaml` sont la source de vérité pour les tests offli
 ./scripts/fetch_jt400.sh
 export JT400_JAR="$HOME/.db2ilens/jt400.jar"
 export DB2ILENS_PASSWORD='…'
-db2ilens scan --host pub400.com --user YOUR_USER --schema YOUR_LIBRARY --out scan.yaml
+db2ilens scan --host pub400.com --user YOUR_USER --schema YOUR_LIBRARY \
+  --tables MLENS_% --out scan.yaml
 ```

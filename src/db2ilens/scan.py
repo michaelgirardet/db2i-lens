@@ -168,6 +168,7 @@ def scan_jdbc(
     schema: str,
     sample_rows: int = 5000,
     jar_path: Path | None = None,
+    tables: str | None = None,
 ) -> ScanResult:
     """Profile an IBM i schema over JDBC and run the registered detection rules."""
     export = load_jdbc_export(
@@ -177,6 +178,7 @@ def scan_jdbc(
         schema=schema,
         sample_rows=sample_rows,
         jar_path=jar_path,
+        tables=tables,
     )
     return build_scan_result(
         export=export,

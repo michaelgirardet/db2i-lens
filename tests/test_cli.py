@@ -23,6 +23,7 @@ def test_scan_help() -> None:
     assert "--offline" in result.output
     assert "--password-stdin" in result.output
     assert "--sample-rows" in result.output
+    assert "--tables" in result.output
 
 
 def test_report_help() -> None:
