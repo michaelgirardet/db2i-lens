@@ -40,19 +40,28 @@ _RULE_BUSINESS_LINES: dict[str, str] = {
     "R09": "Zero used as a missing-value sentinel; treat as NULL in analytics.",
 }
 
-# Tokens aligned with .cursor/DESIGN.md (Db2iLens / iSphere).
+# Tokens aligned with Lattice Design System (.cursor/DESIGN.md) and Penpot site.
 _CSS = """
 :root {
+  --color-ink-ibm: #0B1220;
+  --color-ink-elevated: #111827;
+  --color-ink-panel: #0F172A;
+  --color-ink-line: #243047;
+  --color-system-blue: #2563EB;
+  --color-violet-as400: #7C3AED;
+  --color-periwinkle: #818CF8;
+  --color-lavender: #E9D5FF;
+  --color-db2-soft: #DBEAFE;
+  --color-lattice-soft: #EDE9FE;
   --color-snow: #F8FAFC;
+  --color-mist: #F1F5F9;
   --color-white: #FFFFFF;
   --color-ink: #171923;
   --color-slate: #64748B;
+  --color-slate-mid: #94A3B8;
   --color-hairline: #E2E8F0;
   --color-border: #CBD5E1;
-  --color-system-blue: #2563EB;
-  --color-db2-soft: #DBEAFE;
-  --color-charcoal: #0B0F1A;
-  --color-code-fg: #E2E8F0;
+  --color-code-fg: #F8FAFC;
   --color-critical: #DC2626;
   --color-critical-soft: #FEE2E2;
   --color-critical-text: #991B1B;
@@ -62,26 +71,44 @@ _CSS = """
   --color-info: #0284C7;
   --color-info-soft: #E0F2FE;
   --color-info-text: #075985;
-  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --radius-card: 12px;
+  --color-success: #16A34A;
+  --gradient-brand: linear-gradient(115deg, #2563EB 0%, #7C3AED 55%, #E9D5FF 100%);
+  --font-sans: "Inter Tight", Inter, ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+  --radius-sm: 4px;
+  --radius-control: 8px;
   --radius-badge: 6px;
-  --radius-code: 12px;
+  --radius-card: 16px;
+  --radius-panel: 24px;
+  --radius-pill: 999px;
+  --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.05);
+  --container: 1120px;
+  --header-h: 64px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 body {
   margin: 0;
   font-family: var(--font-sans);
   color: var(--color-ink);
   background: var(--color-snow);
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-.wrap {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 3.5rem;
+::selection {
+  background: color-mix(in srgb, var(--color-violet-as400) 28%, white);
+  color: var(--color-ink);
 }
 code, pre, .mono {
   font-family: var(--font-mono);
@@ -89,40 +116,137 @@ code, pre, .mono {
 }
 a { color: var(--color-system-blue); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 2px; }
+a:focus-visible {
+  outline: 2px solid var(--color-system-blue);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
 
-/* Header */
-.brand-row {
+/* Top chrome — Lattice dark nav language */
+.report-chrome {
+  background: var(--color-ink-ibm);
+  color: var(--color-snow);
+  border-bottom: 1px solid var(--color-ink-line);
+}
+.report-chrome-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  min-height: var(--header-h);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  justify-content: space-between;
+  gap: 1rem;
 }
-.brand-pill {
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.logo-mark {
+  position: relative;
+  width: 30px;
+  height: 22px;
+  flex: none;
+}
+.logo-layer {
+  position: absolute;
+  left: 3px;
+  width: 24px;
+  height: 12px;
+  border-radius: 4.5px;
+}
+.logo-layer--4 { top: 8px; background: #0F172A; }
+.logo-layer--3 { top: 6px; background: #1E293B; }
+.logo-layer--2 { top: 3px; background: var(--color-system-blue); }
+.logo-layer--1 {
+  top: 0;
+  background: linear-gradient(90deg, #2563EB 0%, #7C3AED 55%, #E9D5FF 100%);
+}
+.logo-i {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 1;
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+.brand-product {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.2;
+}
+.brand-ecosystem {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--color-slate-mid);
+  line-height: 1.2;
+}
+.chrome-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.pill {
   display: inline-flex;
   align-items: center;
   padding: 0.2rem 0.65rem;
-  border-radius: 999px;
-  background: var(--color-db2-soft);
-  color: var(--color-system-blue);
+  border-radius: var(--radius-pill);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  line-height: 1.3;
+  white-space: nowrap;
 }
-.brand-meta {
-  color: var(--color-slate);
-  font-size: 0.75rem;
-  font-weight: 500;
+.pill-product {
+  background: color-mix(in srgb, var(--color-system-blue) 22%, transparent);
+  color: #93C5FD;
+  border: 1px solid color-mix(in srgb, var(--color-system-blue) 40%, transparent);
 }
-header h1 {
-  margin: 0 0 0.5rem;
+.pill-readonly {
+  background: color-mix(in srgb, var(--color-success) 16%, transparent);
+  color: #86EFAC;
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
+}
+.brand-accent {
+  height: 3px;
+  background: var(--gradient-brand);
+}
+
+.wrap {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 3.5rem;
+}
+
+/* Header / title block */
+.report-intro {
+  margin-bottom: 1.75rem;
+}
+.report-intro h1 {
+  margin: 0 0 0.75rem;
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.035em;
-  color: var(--color-ink);
-  line-height: 1.15;
+  color: var(--color-ink-ibm);
+  line-height: 1.12;
 }
 .meta {
-  margin: 0 0 0.75rem;
+  margin: 0 0 1rem;
   color: var(--color-slate);
   font-size: 0.8125rem;
   line-height: 1.6;
@@ -130,7 +254,7 @@ header h1 {
 .meta dl {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.15rem 0.75rem;
+  gap: 0.2rem 0.85rem;
   margin: 0;
 }
 .meta dt {
@@ -142,11 +266,39 @@ header h1 {
   color: var(--color-slate);
 }
 .meta code { font-size: 0.95em; color: var(--color-ink); }
-.summary-line {
-  margin: 0 0 1.5rem;
-  font-size: 0.9375rem;
+
+/* Scan metrics — Penpot Focus metric cards */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+.metric {
+  background: var(--color-white);
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  min-height: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.metric .value {
+  font-family: var(--font-mono);
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink-ibm);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.metric .label {
+  margin: 0;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: var(--color-ink);
+  color: var(--color-slate);
 }
 
 /* Severity cards */
@@ -183,10 +335,11 @@ header h1 {
 .card.warning .card-bar { background: var(--color-warning); }
 .card.info .card-bar { background: var(--color-info); }
 .card .value {
+  font-family: var(--font-mono);
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.03em;
-  color: var(--color-ink);
+  color: var(--color-ink-ibm);
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
 }
@@ -245,6 +398,7 @@ nav.toc h2 {
   font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: -0.02em;
+  color: var(--color-ink-ibm);
 }
 .toc-list {
   list-style: none;
@@ -260,12 +414,12 @@ nav.toc h2 {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.65rem 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   border: 1px solid var(--color-hairline);
   background: var(--color-snow);
   text-decoration: none;
   color: inherit;
-  transition: background 0.12s ease, border-color 0.12s ease;
+  transition: background 150ms var(--ease), border-color 150ms var(--ease);
 }
 .toc-list a:hover {
   background: var(--color-db2-soft);
@@ -305,6 +459,7 @@ section.table-block > h2 {
   font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: -0.025em;
+  color: var(--color-ink-ibm);
 }
 section.table-block > h2 code {
   font-size: 0.95em;
@@ -353,6 +508,7 @@ h3.issues-heading {
   margin: 0 0 0.85rem;
   font-size: 1.05rem;
   font-weight: 600;
+  color: var(--color-ink-ibm);
 }
 
 /* Finding cards */
@@ -405,16 +561,16 @@ h3.issues-heading {
 }
 pre.sql {
   margin: 0;
-  background: var(--color-charcoal);
+  background: var(--color-ink-panel);
   color: var(--color-code-fg);
-  border-radius: var(--radius-code);
+  border-radius: 14px;
   padding: 0.9rem 1rem;
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: 0.8125rem;
   line-height: 1.55;
   white-space: pre;
-  border: 0;
+  border: 1px solid var(--color-ink-line);
 }
 .fix-inline code {
   font-size: 0.8125rem;
@@ -434,6 +590,7 @@ pre.sql {
   font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.02em;
+  color: var(--color-ink-ibm);
 }
 .section-hint {
   margin: 0 0 1rem;
@@ -462,16 +619,43 @@ pre.sql {
 
 .empty { color: var(--color-slate); font-style: italic; font-size: 0.875rem; }
 
+.report-footer {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 1.5rem 2.5rem;
+  color: var(--color-slate);
+  font-size: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  align-items: center;
+}
+.report-footer .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-hairline);
+}
+.report-footer strong {
+  color: var(--color-violet-as400);
+  font-weight: 600;
+}
+
 /* Mobile */
 @media (max-width: 720px) {
+  .report-chrome-inner {
+    padding: 0.85rem 1rem;
+    min-height: 0;
+    flex-wrap: wrap;
+  }
   .wrap { padding: 1.25rem 1rem 2.5rem; }
-  header h1 { font-size: 1.5rem; }
+  .report-intro h1 { font-size: 1.5rem; }
   .meta dl {
     grid-template-columns: 1fr;
     gap: 0.1rem;
   }
   .meta dt { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.04em; }
-  .cards {
+  .metrics, .cards {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
@@ -495,7 +679,7 @@ pre.sql {
   nav.toc h2 { display: none; }
   .toc-summary { display: block; margin-bottom: 0.5rem; }
   .toc-summary::before { content: "▸ "; color: var(--color-system-blue); }
-  nav.toc[open] .toc-summary::before { content: "▾ "; }
+  details.toc-wrap[open] .toc-summary::before { content: "▾ "; }
   .toc-list a {
     flex-direction: column;
     align-items: flex-start;
@@ -507,7 +691,7 @@ pre.sql {
   .data-table thead { display: none; }
   .data-table tr {
     border: 1px solid var(--color-hairline);
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     margin-bottom: 0.5rem;
     padding: 0.55rem 0.7rem;
     background: var(--color-white);
@@ -530,6 +714,7 @@ pre.sql {
   .priorities, .decoded { padding: 1rem; }
   .prio-fix { max-width: 100%; }
   .priorities .data-table pre.sql { max-width: 100%; }
+  .report-footer { padding: 0 1rem 2rem; }
 }
 
 /* Print / PDF */
@@ -545,8 +730,25 @@ pre.sql {
   }
   .wrap { max-width: none; padding: 0; }
   a { color: inherit; text-decoration: none; }
-  .brand-pill { border: 1px solid #94A3B8; background: #fff; color: #000; }
-  .cards {
+  .report-chrome {
+    background: #fff !important;
+    color: #000;
+    border-bottom: 1px solid #CBD5E1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .brand-product { color: #000; }
+  .brand-ecosystem { color: #475569; }
+  .pill-product, .pill-readonly {
+    border: 1px solid #94A3B8;
+    background: #fff;
+    color: #000;
+  }
+  .brand-accent {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .metrics, .cards {
     grid-template-columns: repeat(3, 1fr);
     break-inside: avoid;
     page-break-inside: avoid;
@@ -570,13 +772,14 @@ pre.sql {
     page-break-inside: avoid;
   }
   pre.sql {
-    background: #111827 !important;
-    color: #F9FAFB !important;
+    background: #0F172A !important;
+    color: #F8FAFC !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     white-space: pre-wrap;
     overflow: visible;
   }
+  .report-footer { display: none; }
   .print-footer {
     display: block;
     position: fixed;
@@ -619,13 +822,25 @@ def build_html_report(scan: dict[str, Any]) -> str:
         "<title>Db2iLens discovery report</title>",
         f"<style>{_CSS}</style>",
         "</head>",
-        "<body>",
-        '<div class="wrap">',
-        "<header>",
-        '<div class="brand-row">',
-        '<span class="brand-pill">Db2iLens</span>',
-        '<span class="brand-meta">iSphere</span>',
+        '<body data-product="db2ilens">',
+        '<header class="report-chrome">',
+        '<div class="report-chrome-inner">',
+        '<div class="brand">',
+        _logo_mark(),
+        '<div class="brand-text">',
+        '<span class="brand-product">Db2iLens</span>',
+        '<span class="brand-ecosystem">Lattice · by Mokai Studio</span>',
         "</div>",
+        "</div>",
+        '<div class="chrome-meta">',
+        '<span class="pill pill-product">Discovery report</span>',
+        '<span class="pill pill-readonly">Read-only scan</span>',
+        "</div>",
+        "</div>",
+        "</header>",
+        '<div class="brand-accent" aria-hidden="true"></div>',
+        '<div class="wrap">',
+        '<header class="report-intro">',
         "<h1>Discovery report</h1>",
         '<div class="meta">',
         "<dl>",
@@ -636,11 +851,11 @@ def build_html_report(scan: dict[str, Any]) -> str:
         "</dl>",
         "</div>",
         "</header>",
-        '<p class="summary-line">',
-        f"{_esc(summary.get('table_count', 0))} tables  ·  "
-        f"{_esc(summary.get('column_count', 0))} columns  ·  "
-        f"{_esc(summary.get('finding_count', 0))} issues",
-        "</p>",
+        '<div class="metrics" role="group" aria-label="Scan summary">',
+        _metric_card(summary.get("table_count", 0), "Tables analyzed"),
+        _metric_card(summary.get("column_count", 0), "Columns profiled"),
+        _metric_card(summary.get("finding_count", 0), "Issues detected"),
+        "</div>",
         '<div class="cards" role="group" aria-label="Findings by severity">',
         _severity_card(
             "critical",
@@ -671,8 +886,15 @@ def build_html_report(scan: dict[str, Any]) -> str:
     parts.extend(
         [
             "</div>",
+            '<footer class="report-footer">',
+            "<span>Db2iLens discovery report</span>",
+            '<span class="dot" aria-hidden="true"></span>',
+            "<span>Read-only scan</span>",
+            '<span class="dot" aria-hidden="true"></span>',
+            "<span><strong>Lattice</strong> by Mokai Studio</span>",
+            "</footer>",
             '<div class="print-footer" aria-hidden="true">'
-            "Db2iLens discovery report · read-only scan · iSphere"
+            "Db2iLens discovery report · read-only scan · Lattice by Mokai Studio"
             "</div>",
             "</body>",
             "</html>",
@@ -680,6 +902,27 @@ def build_html_report(scan: dict[str, Any]) -> str:
         ]
     )
     return "\n".join(parts)
+
+
+def _logo_mark() -> str:
+    return (
+        '<span class="logo-mark" aria-hidden="true">'
+        '<span class="logo-layer logo-layer--4"></span>'
+        '<span class="logo-layer logo-layer--3"></span>'
+        '<span class="logo-layer logo-layer--2"></span>'
+        '<span class="logo-layer logo-layer--1"></span>'
+        '<span class="logo-i">i</span>'
+        "</span>"
+    )
+
+
+def _metric_card(count: Any, label: str) -> str:
+    return (
+        '<div class="metric">'
+        f'<div class="value">{_esc(count)}</div>'
+        f'<p class="label">{_esc(label)}</p>'
+        "</div>"
+    )
 
 
 def _severity_card(severity: str, count: Any, hint: str) -> str:
