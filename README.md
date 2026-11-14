@@ -1,78 +1,154 @@
 # Db2iLens
 
-Outil open source qui profile les données d'un IBM i (AS/400), détecte les pièges legacy
-(EBCDIC, décimales packées, dates numériques, noms courts) et génère automatiquement
-le SQL dbt de nettoyage pour une migration vers un stack moderne.
+> Also available in [French](README.fr.md).
 
-> **Statut :** phases **P0–P5** livrées — scan offline + JDBC (JT400), rapports HTML,
-> générateur dbt + `dbt run`/`dbt test` DuckDB, guide PUB400.
-> Backlog : **P6** (R09/R10, naming LLM, cibles Postgres/Snowflake).
+<p align="center">
+  <img src="docs/assets/db2ilens-logo-canva.png" alt="Db2iLens logo" width="160" height="160">
+</p>
 
 [![CI](https://github.com/michaelgirardet/db2i-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/michaelgirardet/db2i-lens/actions/workflows/ci.yml)
-License: MIT
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![mypy](https://img.shields.io/badge/mypy-strict-blue.svg)](https://mypy-lang.org/)
+[![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](#)
 
-## Problème
+> **See your IBM i data clearly**
 
-Les migrations AS/400 → cloud échouent souvent sur les *quirks* des données
-(dates `YYYYMMDD`, CCSID 65535, blancs au lieu de NULL, colonnes à 10 caractères),
-pas sur la connexion elle-même.
+Open-source tool that profiles IBM i (AS/400) data, detects legacy pitfalls (EBCDIC, packed decimals, numeric dates, short names) and automatically generates **dbt SQL** for cleaning during migration to a modern stack.
 
-## MVP (roadmap)
+> **Status:** phases **P0-P5** delivered - offline scan + JDBC (JT400), HTML reports, dbt project generator + `dbt run`/`dbt test` with DuckDB, PUB400 guide.
+> **Backlog:** **P6** (R10, LLM naming, Postgres/Snowflake targets).
 
-| Phase | Contenu | Statut |
-|---|---|---|
-| **P0** | Squelette repo, CLI, `Rule`, fixtures mini-ERP, CI | [x] |
-| **P1** | Connector offline + profiling + R01, R05, R08 + `scan --offline` | [x] |
-| **P2** | Règles R02–R04, R06, R07 + dictionnaire d'abréviations | [x] |
-| **P3** | Rapport Markdown/HTML + `scan.yaml` stable | [x] |
-| **P4** | Générateur dbt + e2e DuckDB | [x] |
-| **P5** | Connector JDBC JT400 + doc PUB400 | [x] |
-| **P6** | Relations R10, naming LLM, Postgres/Snowflake (backlog) | [ ] |
+---
+
+## Table of Contents
+
+- [Quickstart](#quickstart)
+- [Screenshots](#screenshots)
+- [Problem](#problem)
+- [MVP (Roadmap)](#mvp-roadmap)
+- [Installation](#installation-dev)
+- [Commands](#commands)
+- [Reproducible Offline Demo Path](#reproducible-offline-demo-path)
+- [Try it on PUB400](#try-it-on-pub400)
+- [Structure](#structure)
+- [Development](#development)
+- [License](#license)
+
+---
+
+## Quickstart
+
+**Try Db2iLens in 3 commands without IBM i:**
+
+```bash
+# 1. Clone and install
+uv sync
+
+# 2. Scan the demo mini-ERP (offline)
+uv run db2ilens scan --offline examples/mini_erp/ --out /tmp/scan.yaml
+
+# 3. Generate HTML report
+uv run db2ilens report /tmp/scan.yaml --format html --out /tmp/report.html
+```
+
+The generated report (`/tmp/report.html`) contains the complete analysis of the 4 tables in the mini-ERP with **8+ detected legacy pitfalls**.
+
+---
+
+## Screenshots
+
+### HTML Discovery Report
+
+![HTML Discovery Report](docs/assets/report-screenshot.png)
+
+*Example report from the mini-ERP (`CLIENTS`, `COMMANDES`, `LIGNES_CMD`, `ARTICLES`). A full snapshot is committed as [`demo-report.html`](demo-report.html) and can be regenerated with the [offline demo path](#reproducible-offline-demo-path).*
+
+### Logo
+
+![Db2iLens Logo](docs/assets/db2ilens-logo-canva.png)
+
+*Db2iLens logo — lens / lattice mark in Lattice brand colors (system blue `#2563EB`, violet `#7C3AED`). SVG variants remain in `docs/assets/`.*
+
+---
+
+## Problem
+
+AS/400 to cloud migrations **often fail on data quirks** (YYYYMMDD dates, CCSID 65535, blanks instead of NULL, 10-character columns), **not on connectivity itself**.
+
+---
+
+## MVP (Roadmap)
+
+| Phase | Content | Status |
+|-------|---------|--------|
+| **P0** | Repository skeleton, CLI, `Rule`, mini-ERP fixtures, CI | ✅ |
+| **P1** | Offline connector + profiling + R01, R05, R08 + `scan --offline` | ✅ |
+| **P2** | Rules R02-R04, R06, R07 + abbreviation dictionary | ✅ |
+| **P3** | Markdown/HTML reports + stable `scan.yaml` contract | ✅ |
+| **P4** | dbt project generator + e2e testing with DuckDB | ✅ |
+| **P5** | JT400 JDBC connector + PUB400 integration guide | ✅ |
+| **P6** | R10 relationships, LLM naming, Postgres/Snowflake targets (backlog) | ⏳ |
+
+---
 
 ## Installation (dev)
 
 ```bash
 uv sync
-./scripts/fetch_jt400.sh   # JDBC only — see docs/JT400.md
+./scripts/fetch_jt400.sh   # JDBC only - see docs/JT400.md
 uv run db2ilens --help
 ```
 
-## Commandes
+---
+
+## Commands
 
 ```bash
-# Scanner (offline)
+# Scan (offline)
 db2ilens scan --offline examples/mini_erp/ --out scan.yaml
 
-# Scanner (IBM i / PUB400 — personal library + MLENS_ filter)
+# Scan (IBM i / PUB400 - personal library + MLENS_ filter)
 export JT400_JAR=$HOME/.db2ilens/jt400.jar
-export DB2ILENS_PASSWORD='…'
+export DB2ILENS_PASSWORD='...'
 db2ilens scan --host pub400.com --user YOUR_USER --schema YOUR_LIBRARY \
   --tables MLENS_% --out scan.yaml
 
-# Rapport de découverte (Markdown / HTML)
-db2ilens report scan.yaml --format html --out rapport.html
+# Discovery report (Markdown / HTML)
+db2ilens report scan.yaml --format html --out report.html
 
-# Projet dbt bronze/silver
+# dbt project (bronze/silver)
 db2ilens gen-dbt scan.yaml --out dbt_project/ --target duckdb
 ```
 
-Le mot de passe IBM i passe uniquement via `--password-stdin` ou `DB2ILENS_PASSWORD`
-(jamais en argument CLI ni en fichier).
+> **⚠️ Security:** IBM i passwords are passed **only** via `--password-stdin` or `DB2ILENS_PASSWORD` environment variable (never as CLI argument or in files).
+
+---
+
+## Reproducible Offline Demo Path
+
+To regenerate an HTML report from the mini-ERP (without IBM i):
+
+```bash
+uv run db2ilens scan --offline examples/mini_erp/ --out /tmp/scan_mini_erp.yaml
+# Optional for a public-facing snapshot: rewrite scan.source to a relative path
+# (offline scans store an absolute path by design — see docs/assets/README.md)
+uv run db2ilens report /tmp/scan_mini_erp.yaml --format html --out /tmp/report_mini_erp.html
+```
+
+Committed demo snapshot: [`demo-report.html`](demo-report.html).
+*Illustrative snapshot — regenerate after fixture changes or report renderer modifications.*
+
+---
 
 ## Try it on PUB400
 
-1. **Compte** : [pub400.com](https://pub400.com) (activation parfois différée de quelques heures).
-2. **Driver** : Java 11+ et `./scripts/fetch_jt400.sh` (détails dans [docs/JT400.md](docs/JT400.md)).
-3. **Bibliothèque personnelle** : les comptes gratuits **ne peuvent pas**
-   `CREATE SCHEMA`. Chaque utilisateur a déjà une bibliothèque personnelle
-   (souvent = profil utilisateur en majuscules). Elle peut contenir d'autres
-   objets — d'où le préfixe `MLENS_` sur les tables démo et le filtre
-   `--tables MLENS_%`.
-4. **Charger le mini-ERP** : éditez
-   [`examples/mini_erp/pub400_setup.sql`](examples/mini_erp/pub400_setup.sql),
-   remplacez `YOUR_LIBRARY` par votre bibliothèque, exécutez le script dans ACS
-   *Run SQL Scripts*.
-5. **Vérifs ACS** (remplacez `YOUR_LIBRARY`) :
+1. **Account:** [pub400.com](https://pub400.com) (activation may be delayed by a few hours).
+2. **Driver:** Java 11+ and `./scripts/fetch_jt400.sh` (details in [docs/JT400.md](docs/JT400.md)).
+3. **Personal Library:** Free accounts **cannot** `CREATE SCHEMA`. Each user already has a personal library (often = user profile in uppercase). It may contain other objects - hence the `MLENS_` prefix on demo tables and the `--tables MLENS_%` filter.
+4. **Load the mini-ERP:** Edit [`examples/mini_erp/pub400_setup.sql`](examples/mini_erp/pub400_setup.sql), replace `YOUR_LIBRARY` with your library, run the script in ACS *Run SQL Scripts*.
+5. **ACS Checks** (replace `YOUR_LIBRARY`):
    ```sql
    SELECT COUNT(*) FROM YOUR_LIBRARY.MLENS_COMMANDES;  -- 5
    SELECT CCSID FROM QSYS2.SYSCOLUMNS2
@@ -80,57 +156,63 @@ Le mot de passe IBM i passe uniquement via `--password-stdin` ou `DB2ILENS_PASSW
        AND TABLE_NAME = 'MLENS_CLIENTS'
        AND COLUMN_NAME = 'CUSNAME';  -- 65535
    ```
-6. **Scan + rapport + dbt** :
+6. **Scan + report + dbt:**
    ```bash
    export JT400_JAR=$HOME/.db2ilens/jt400.jar
    export DB2ILENS_USER=YOUR_USER
-   export DB2ILENS_PASSWORD='…'
+   export DB2ILENS_PASSWORD='...'
    export PUB400_SCHEMA=YOUR_LIBRARY   # personal library
    export PUB400_TABLES=MLENS_%        # integration tests + demo filter
 
    uv run db2ilens scan --host pub400.com --user "$DB2ILENS_USER" \
      --schema "$PUB400_SCHEMA" --tables "$PUB400_TABLES" \
      --out /tmp/scan_pub400.yaml
-   uv run db2ilens report /tmp/scan_pub400.yaml --format html --out /tmp/rapport.html
+   uv run db2ilens report /tmp/scan_pub400.yaml --format html --out /tmp/report.html
    uv run db2ilens gen-dbt /tmp/scan_pub400.yaml --out /tmp/dbt_pub400 --target duckdb
    ```
-7. **Limites PUB400** : quota CPU/connexion, première session JT400 parfois lente,
-   bibliothèques en **majuscules**.  
-   **R04** (`implied_scale` sur `PRC`) : *implicit decimal scale is a schema-level
-   declaration, invisible in SYSCOLUMNS2* — attendu **absent** en JDBC, présent
-   en mode offline (divergence documentée pour la parité #18).
+7. **PUB400 Limits:** CPU/connection quota, first JT400 session sometimes slow, libraries in **uppercase**.
+   **R04 note:** (`implied_scale` on `PRC`): *implicit decimal scale is a schema-level declaration, invisible in SYSCOLUMNS2* - expected **absent** in JDBC, present in offline mode (documented divergence for parity #18).
 
-Tests live (hors CI) :
-
+**Live tests (outside CI):**
 ```bash
 export PUB400_TABLES=MLENS_%
 uv run pytest -m integration
 ```
+
+---
 
 ## Structure
 
 ```text
 src/db2ilens/
 ├── cli.py
-├── connector/     # JDBC + offline
-├── profiler/      # métadonnées + échantillonnage
-├── rules/         # détection des pièges legacy
-├── report/        # Markdown / HTML
-├── scan.py        # contrat scan.yaml
-└── dbtgen/        # templates Jinja2 → projet dbt
+├── connector/     # JDBC + offline connectors
+├── profiler/      # metadata + sampling
+├── rules/         # legacy pitfalls detection
+├── report/        # Markdown / HTML renderers
+├── scan.py        # scan.yaml contract & validation
+└── dbtgen/        # Jinja2 templates -> dbt project
 ```
 
-## Développement
+---
 
-Voir [AGENTS.md](AGENTS.md) et [docs/PRD.md](docs/PRD.md).
+## Development
+
+See:
+- [CONTRIBUTING.md](CONTRIBUTING.md) — contribution guidelines
+- [AGENTS.md](AGENTS.md) — project rules
+- [docs/SCAN_CONTRACT.md](docs/SCAN_CONTRACT.md) — stable `scan.yaml` contract
+- [CHANGELOG.md](CHANGELOG.md) — releases and detection rules table
 
 ```bash
-uv run ruff check .
-uv run mypy src
-uv run pytest                 # exclut @pytest.mark.integration
-uv run pytest -m integration  # PUB400 live
+uv run ruff check .          # Linting
+uv run mypy src              # Strict type checking
+uv run pytest                 # Excludes @pytest.mark.integration
+uv run pytest -m integration  # PUB400 live tests
 ```
 
-## Licence
+---
 
-MIT — voir [LICENSE](LICENSE).
+## License
+
+MIT - see [LICENSE](LICENSE).

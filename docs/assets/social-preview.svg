@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <!-- Background -->
+  <rect width="1280" height="640" fill="#0B1220"/>
+  
+  <!-- Logo area -->
+  <g transform="translate(100, 100)">
+    <defs>
+      <linearGradient id="lensGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#2563EB;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    
+    <!-- Lens shape (scaled up) -->
+    <circle cx="150" cy="150" r="120" fill="none" stroke="url(#lensGrad)" stroke-width="18"/>
+    
+    <!-- Handle -->
+    <path d="M210 110 L270 70" stroke="url(#lensGrad)" stroke-width="15" stroke-linecap="round"/>
+    
+    <!-- Data bars -->
+    <g transform="translate(90, 90)">
+      <rect x="0" y="0" width="120" height="6" fill="#2563EB" opacity="0.8"/>
+      <rect x="0" y="30" width="120" height="6" fill="#2563EB" opacity="0.8"/>
+      <rect x="0" y="60" width="120" height="6" fill="#2563EB" opacity="0.8"/>
+      <rect x="0" y="90" width="120" height="6" fill="#2563EB" opacity="0.8"/>
+    </g>
+    
+    <!-- Focus point -->
+    <circle cx="150" cy="150" r="12" fill="#2563EB"/>
+    
+    <!-- Text -->
+    <text x="150" y="280" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" 
+          font-size="48" font-weight="700" text-anchor="middle" fill="white">
+      Db2iLens
+    </text>
+  </g>
+  
+  <!-- Main content -->
+  <g transform="translate(100, 350)">
+    <!-- Tagline -->
+    <text x="0" y="0" font-family="Inter, sans-serif" 
+          font-size="32" font-weight="400" fill="#E2E8F0">
+      Voir vos données IBM i clairement
+    </text>
+    
+    <!-- Subtitle -->
+    <text x="0" y="50" font-family="Inter, sans-serif" 
+          font-size="24" font-weight="300" fill="#94A3B8">
+      Profilez, détectez les pièges legacy, générez du dbt – automatiquement
+    </text>
+    
+    <!-- Features -->
+    <text x="0" y="110" font-family="Inter, sans-serif" 
+          font-size="18" font-weight="400" fill="#64748B">
+      ✓ Détection automatique des dates numériques, EBCDIC, décimales packées
+    </text>
+    <text x="0" y="140" font-family="Inter, sans-serif" 
+          font-size="18" font-weight="400" fill="#64748B">
+      ✓ Génération de projets dbt prêts à l'emploi
+    </text>
+    <text x="0" y="170" font-family="Inter, sans-serif" 
+          font-size="18" font-weight="400" fill="#64748B">
+      ✓ Mode offline – testez sans accès IBM i
+    </text>
+  </g>
+  
+  <!-- Bottom right: GitHub info -->
+  <g transform="translate(1000, 580)">
+    <text x="0" y="0" font-family="Inter, sans-serif" 
+          font-size="16" font-weight="400" fill="#64748B">
+      Open Source • MIT License
+    </text>
+    <text x="0" y="30" font-family="Inter, sans-serif" 
+          font-size="16" font-weight="400" fill="#64748B">
+      github.com/michaelgirardet/db2i-lens
+    </text>
+  </g>
+</svg>

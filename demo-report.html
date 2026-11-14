@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Db2iLens discovery report</title>
+<style>:root {
+  --color-ink-ibm: #0B1220;
+  --color-ink-elevated: #111827;
+  --color-ink-panel: #0F172A;
+  --color-ink-line: #243047;
+  --color-system-blue: #2563EB;
+  --color-violet-as400: #7C3AED;
+  --color-periwinkle: #818CF8;
+  --color-lavender: #E9D5FF;
+  --color-db2-soft: #DBEAFE;
+  --color-lattice-soft: #EDE9FE;
+  --color-snow: #F8FAFC;
+  --color-mist: #F1F5F9;
+  --color-white: #FFFFFF;
+  --color-ink: #171923;
+  --color-slate: #64748B;
+  --color-slate-mid: #94A3B8;
+  --color-hairline: #E2E8F0;
+  --color-border: #CBD5E1;
+  --color-code-fg: #F8FAFC;
+  --color-critical: #DC2626;
+  --color-critical-soft: #FEE2E2;
+  --color-critical-text: #991B1B;
+  --color-warning: #D97706;
+  --color-warning-soft: #FEF3C7;
+  --color-warning-text: #92400E;
+  --color-info: #0284C7;
+  --color-info-soft: #E0F2FE;
+  --color-info-text: #075985;
+  --color-success: #16A34A;
+  --gradient-brand: linear-gradient(115deg, #2563EB 0%, #7C3AED 55%, #E9D5FF 100%);
+  --font-sans: "Inter Tight", Inter, ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+  --radius-sm: 4px;
+  --radius-control: 8px;
+  --radius-badge: 6px;
+  --radius-card: 16px;
+  --radius-panel: 24px;
+  --radius-pill: 999px;
+  --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.05);
+  --container: 1120px;
+  --header-h: 64px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-snow);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection {
+  background: color-mix(in srgb, var(--color-violet-as400) 28%, white);
+  color: var(--color-ink);
+}
+code, pre, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+a { color: var(--color-system-blue); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+a:focus-visible {
+  outline: 2px solid var(--color-system-blue);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Top chrome — Lattice dark nav language */
+.report-chrome {
+  background: var(--color-ink-ibm);
+  color: var(--color-snow);
+  border-bottom: 1px solid var(--color-ink-line);
+}
+.report-chrome-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  min-height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.logo-mark {
+  position: relative;
+  width: 30px;
+  height: 22px;
+  flex: none;
+}
+.logo-layer {
+  position: absolute;
+  left: 3px;
+  width: 24px;
+  height: 12px;
+  border-radius: 4.5px;
+}
+.logo-layer--4 { top: 8px; background: #0F172A; }
+.logo-layer--3 { top: 6px; background: #1E293B; }
+.logo-layer--2 { top: 3px; background: var(--color-system-blue); }
+.logo-layer--1 {
+  top: 0;
+  background: linear-gradient(90deg, #2563EB 0%, #7C3AED 55%, #E9D5FF 100%);
+}
+.logo-i {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 1;
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+.brand-product {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.2;
+}
+.brand-ecosystem {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--color-slate-mid);
+  line-height: 1.2;
+}
+.chrome-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.pill-product {
+  background: color-mix(in srgb, var(--color-system-blue) 22%, transparent);
+  color: #93C5FD;
+  border: 1px solid color-mix(in srgb, var(--color-system-blue) 40%, transparent);
+}
+.pill-readonly {
+  background: color-mix(in srgb, var(--color-success) 16%, transparent);
+  color: #86EFAC;
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
+}
+.brand-accent {
+  height: 3px;
+  background: var(--gradient-brand);
+}
+
+.wrap {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 3.5rem;
+}
+
+/* Header / title block */
+.report-intro {
+  margin-bottom: 1.75rem;
+}
+.report-intro h1 {
+  margin: 0 0 0.75rem;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--color-ink-ibm);
+  line-height: 1.12;
+}
+.meta {
+  margin: 0 0 1rem;
+  color: var(--color-slate);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.meta dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.85rem;
+  margin: 0;
+}
+.meta dt {
+  color: var(--color-slate);
+  font-weight: 500;
+}
+.meta dd {
+  margin: 0;
+  color: var(--color-slate);
+}
+.meta code { font-size: 0.95em; color: var(--color-ink); }
+
+/* Scan metrics — Penpot Focus metric cards */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+.metric {
+  background: var(--color-white);
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  min-height: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.metric .value {
+  font-family: var(--font-mono);
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink-ibm);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.metric .label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-slate);
+}
+
+/* Severity cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 2rem;
+  align-items: stretch;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  padding: 1.1rem 1.15rem;
+  min-height: 7rem;
+}
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.card-bar {
+  width: 1.5rem;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.card.critical .card-bar { background: var(--color-critical); }
+.card.warning .card-bar { background: var(--color-warning); }
+.card.info .card-bar { background: var(--color-info); }
+.card .value {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--color-ink-ibm);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.card .hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-slate);
+  font-weight: 400;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-badge);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.badge.critical {
+  background: var(--color-critical-soft);
+  color: var(--color-critical-text);
+}
+.badge.warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+}
+.badge.info {
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+}
+.badge-print {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #334155;
+  border: 1px solid #64748B;
+  background: #F1F5F9;
+  border-radius: var(--radius-badge);
+  padding: 0.15rem 0.45rem;
+}
+
+/* TOC */
+nav.toc {
+  background: var(--color-white);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 2.5rem;
+}
+nav.toc h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-ink-ibm);
+}
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.toc-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-hairline);
+  background: var(--color-snow);
+  text-decoration: none;
+  color: inherit;
+  transition: background 150ms var(--ease), border-color 150ms var(--ease);
+}
+.toc-list a:hover {
+  background: var(--color-db2-soft);
+  border-color: #BFDBFE;
+  text-decoration: none;
+}
+.toc-list a:hover .toc-name { color: var(--color-system-blue); }
+.toc-name {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.toc-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+.toc-summary {
+  display: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  list-style: none;
+}
+.toc-summary::-webkit-details-marker { display: none; }
+
+/* Table sections */
+section.table-block {
+  margin: 0 0 2.5rem;
+  padding-top: 0.25rem;
+  break-inside: avoid;
+}
+section.table-block > h2 {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--color-ink-ibm);
+}
+section.table-block > h2 code {
+  font-size: 0.95em;
+  color: var(--color-system-blue);
+}
+.panel {
+  background: var(--color-white);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.7rem 0.9rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-hairline);
+  height: 2.75rem;
+}
+.data-table th {
+  background: var(--color-snow);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-slate);
+}
+.data-table tbody tr:last-child td { border-bottom: 0; }
+.data-table td code {
+  font-size: 0.8125rem;
+  color: var(--color-ink);
+}
+.data-table .col-type {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+h3.issues-heading {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-ink-ibm);
+}
+
+/* Finding cards */
+.finding {
+  background: var(--color-white);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  padding: 1.1rem 1.2rem;
+  margin: 0 0 0.75rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.finding-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+.finding-target {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.finding-rule {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-system-blue);
+}
+.business {
+  margin: 0 0 0.35rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.message {
+  margin: 0 0 0.65rem;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+.fix-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-slate);
+}
+pre.sql {
+  margin: 0;
+  background: var(--color-ink-panel);
+  color: var(--color-code-fg);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  white-space: pre;
+  border: 1px solid var(--color-ink-line);
+}
+.fix-inline code {
+  font-size: 0.8125rem;
+}
+
+/* Priorities + decoded */
+.priorities, .decoded {
+  background: var(--color-white);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  padding: 1.25rem 1.35rem;
+  margin: 0 0 2rem;
+}
+.priorities { break-before: avoid; }
+.priorities h2, .decoded h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-ink-ibm);
+}
+.section-hint {
+  margin: 0 0 1rem;
+  color: var(--color-slate);
+  font-size: 0.8125rem;
+}
+.prio-num {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.prio-fix {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-slate);
+  max-width: 28rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.priorities .data-table td { height: auto; padding-top: 0.85rem; padding-bottom: 0.85rem; }
+.priorities .data-table pre.sql {
+  padding: 0.55rem 0.7rem;
+  font-size: 0.75rem;
+  max-width: 22rem;
+}
+
+.empty { color: var(--color-slate); font-style: italic; font-size: 0.875rem; }
+
+.report-footer {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 1.5rem 2.5rem;
+  color: var(--color-slate);
+  font-size: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  align-items: center;
+}
+.report-footer .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-hairline);
+}
+.report-footer strong {
+  color: var(--color-violet-as400);
+  font-weight: 600;
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+  .report-chrome-inner {
+    padding: 0.85rem 1rem;
+    min-height: 0;
+    flex-wrap: wrap;
+  }
+  .wrap { padding: 1.25rem 1rem 2.5rem; }
+  .report-intro h1 { font-size: 1.5rem; }
+  .meta dl {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+  .meta dt { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .metrics, .cards {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 0;
+    padding: 0.75rem 0.9rem;
+    gap: 0.75rem;
+  }
+  .card-top { flex: 1; }
+  .card .value {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  .card .hint { display: none; }
+  .card-bar { display: none; }
+
+  nav.toc { padding: 0.85rem 1rem; }
+  nav.toc h2 { display: none; }
+  .toc-summary { display: block; margin-bottom: 0.5rem; }
+  .toc-summary::before { content: "▸ "; color: var(--color-system-blue); }
+  details.toc-wrap[open] .toc-summary::before { content: "▾ "; }
+  .toc-list a {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .panel { overflow: visible; }
+  .data-table, .data-table thead, .data-table tbody,
+  .data-table th, .data-table td, .data-table tr { display: block; }
+  .data-table thead { display: none; }
+  .data-table tr {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-control);
+    margin-bottom: 0.5rem;
+    padding: 0.55rem 0.7rem;
+    background: var(--color-white);
+  }
+  .data-table td {
+    border: 0;
+    height: auto;
+    padding: 0.2rem 0;
+  }
+  .data-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-slate);
+    margin-bottom: 0.1rem;
+  }
+  .priorities, .decoded { padding: 1rem; }
+  .prio-fix { max-width: 100%; }
+  .priorities .data-table pre.sql { max-width: 100%; }
+  .report-footer { padding: 0 1rem 2rem; }
+}
+
+/* Print / PDF */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm 16mm;
+  }
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 10.5pt;
+  }
+  .wrap { max-width: none; padding: 0; }
+  a { color: inherit; text-decoration: none; }
+  .report-chrome {
+    background: #fff !important;
+    color: #000;
+    border-bottom: 1px solid #CBD5E1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .brand-product { color: #000; }
+  .brand-ecosystem { color: #475569; }
+  .pill-product, .pill-readonly {
+    border: 1px solid #94A3B8;
+    background: #fff;
+    color: #000;
+  }
+  .brand-accent {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .metrics, .cards {
+    grid-template-columns: repeat(3, 1fr);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .card { box-shadow: none; min-height: 0; padding: 0.6rem 0.7rem; }
+  .badge { display: none; }
+  .badge-print { display: inline-flex; }
+  .toc-list a {
+    break-inside: avoid;
+    background: #fff;
+    border-color: #CBD5E1;
+  }
+  .toc-list a:hover { background: #fff; }
+  nav.toc { break-after: avoid; }
+  .priorities {
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+  .finding, .panel, .priorities, .decoded, section.table-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  pre.sql {
+    background: #0F172A !important;
+    color: #F8FAFC !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    white-space: pre-wrap;
+    overflow: visible;
+  }
+  .report-footer { display: none; }
+  .print-footer {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 8pt;
+    color: #64748B;
+    border-top: 1px solid #E2E8F0;
+    padding-top: 4pt;
+  }
+}
+@media screen {
+  .print-footer { display: none; }
+}</style>
+</head>
+<body data-product="db2ilens">
+<header class="report-chrome">
+<div class="report-chrome-inner">
+<div class="brand">
+<span class="logo-mark" aria-hidden="true"><span class="logo-layer logo-layer--4"></span><span class="logo-layer logo-layer--3"></span><span class="logo-layer logo-layer--2"></span><span class="logo-layer logo-layer--1"></span><span class="logo-i">i</span></span>
+<div class="brand-text">
+<span class="brand-product">Db2iLens</span>
+<span class="brand-ecosystem">Lattice · by Mokai Studio</span>
+</div>
+</div>
+<div class="chrome-meta">
+<span class="pill pill-product">Discovery report</span>
+<span class="pill pill-readonly">Read-only scan</span>
+</div>
+</div>
+</header>
+<div class="brand-accent" aria-hidden="true"></div>
+<div class="wrap">
+<header class="report-intro">
+<h1>Discovery report</h1>
+<div class="meta">
+<dl>
+<dt>Source</dt><dd><code>examples/mini_erp</code></dd>
+<dt>Generated</dt><dd>2026-11-14T11:35:03.246607+00:00</dd>
+<dt>Mode</dt><dd>offline</dd>
+<dt>Schema</dt><dd><code>DEMO_LIB</code></dd>
+</dl>
+</div>
+</header>
+<div class="metrics" role="group" aria-label="Scan summary">
+<div class="metric"><div class="value">4</div><p class="label">Tables analyzed</p></div>
+<div class="metric"><div class="value">17</div><p class="label">Columns profiled</p></div>
+<div class="metric"><div class="value">17</div><p class="label">Issues detected</p></div>
+</div>
+<div class="cards" role="group" aria-label="Findings by severity">
+<div class="card critical"><div class="card-top"><span class="badge critical">critical</span><span class="card-bar" aria-hidden="true"></span></div><div class="value">1</div><p class="hint">Blocking data issues</p></div>
+<div class="card warning"><div class="card-top"><span class="badge warning">warning</span><span class="card-bar" aria-hidden="true"></span></div><div class="value">5</div><p class="hint">Review before migration</p></div>
+<div class="card info"><div class="card-top"><span class="badge info">info</span><span class="card-bar" aria-hidden="true"></span></div><div class="value">11</div><p class="hint">Naming and modelling hints</p></div>
+</div>
+<details class="toc-wrap" open><summary class="toc-summary">Tables in this scan</summary><nav class="toc" aria-label="Tables"><h2>Tables in this scan</h2><ul class="toc-list"><li><a href="#table-articles"><span class="toc-name">ARTICLES</span><span class="toc-counts"><span class="badge warning">warning 1</span><span class="badge-print" aria-hidden="true">▣▣ warning 1</span><span class="badge info">info 1</span><span class="badge-print" aria-hidden="true">□□ info 1</span></span></a></li><li><a href="#table-clients"><span class="toc-name">CLIENTS</span><span class="toc-counts"><span class="badge critical">critical 1</span><span class="badge-print" aria-hidden="true">■■ critical 1</span><span class="badge warning">warning 1</span><span class="badge-print" aria-hidden="true">▣▣ warning 1</span><span class="badge info">info 4</span><span class="badge-print" aria-hidden="true">□□ info 4</span></span></a></li><li><a href="#table-commandes"><span class="toc-name">COMMANDES</span><span class="toc-counts"><span class="badge warning">warning 1</span><span class="badge-print" aria-hidden="true">▣▣ warning 1</span><span class="badge info">info 3</span><span class="badge-print" aria-hidden="true">□□ info 3</span></span></a></li><li><a href="#table-lignes_cmd"><span class="toc-name">LIGNES_CMD</span><span class="toc-counts"><span class="badge warning">warning 2</span><span class="badge-print" aria-hidden="true">▣▣ warning 2</span><span class="badge info">info 3</span><span class="badge-print" aria-hidden="true">□□ info 3</span></span></a></li></ul></nav></details>
+<section class="priorities"><h2>Migration priorities</h2><p class="section-hint">Start with the most serious issues. Fix encoding and data-quality problems before renaming columns.</p><div class="panel"><table class="data-table"><thead><tr><th>#</th><th>Table.Column</th><th>Rule</th><th>Severity</th><th>Fix</th></tr></thead><tbody><tr><td data-label="#"><span class="prio-num">1</span></td><td data-label="Table.Column"><code>CLIENTS.CUSNAME</code></td><td data-label="Rule"><code>R03</code></td><td data-label="Severity"><span class="badge critical">critical</span><span class="badge-print" aria-hidden="true">■■ critical</span></td><td data-label="Fix"><pre class="sql">CAST(CUSNAME AS VARCHAR) /* TODO: apply CCSID 65535 translation table */</pre></td></tr><tr><td data-label="#"><span class="prio-num">2</span></td><td data-label="Table.Column"><code>ARTICLES.CRTDTE</code></td><td data-label="Rule"><code>R02</code></td><td data-label="Severity"><span class="badge warning">warning</span><span class="badge-print" aria-hidden="true">▣▣ warning</span></td><td data-label="Fix"><pre class="sql">TO_DATE(CASE WHEN SUBSTR(LPAD(CAST(CRTDTE AS VARCHAR), 7, &#x27;0&#x27;), 1, 1) = &#x27;0&#x27; THEN &#x27;19&#x27; ELSE &#x27;20&#x27; END || SUBSTR(LPAD(CAST(CRTDTE AS VARCHAR), 7, &#x27;0&#x27;), 2, 6), &#x27;YYYYMMDD&#x27;)</pre></td></tr><tr><td data-label="#"><span class="prio-num">3</span></td><td data-label="Table.Column"><code>CLIENTS.CUSNAME</code></td><td data-label="Rule"><code>R05</code></td><td data-label="Severity"><span class="badge warning">warning</span><span class="badge-print" aria-hidden="true">▣▣ warning</span></td><td data-label="Fix"><pre class="sql">NULLIF(TRIM(CUSNAME), &#x27;&#x27;)</pre></td></tr><tr><td data-label="#"><span class="prio-num">4</span></td><td data-label="Table.Column"><code>COMMANDES.ORDDTE</code></td><td data-label="Rule"><code>R01</code></td><td data-label="Severity"><span class="badge warning">warning</span><span class="badge-print" aria-hidden="true">▣▣ warning</span></td><td data-label="Fix"><pre class="sql">TO_DATE(TO_CHAR(ORDDTE), &#x27;YYYYMMDD&#x27;)</pre></td></tr><tr><td data-label="#"><span class="prio-num">5</span></td><td data-label="Table.Column"><code>LIGNES_CMD.PRC</code></td><td data-label="Rule"><code>R04</code></td><td data-label="Severity"><span class="badge warning">warning</span><span class="badge-print" aria-hidden="true">▣▣ warning</span></td><td data-label="Fix"><pre class="sql">CAST(PRC / 100 AS DECIMAL(9, 2))</pre></td></tr><tr><td data-label="#"><span class="prio-num">6</span></td><td data-label="Table.Column"><code>LIGNES_CMD.TAGS</code></td><td data-label="Rule"><code>R07</code></td><td data-label="Severity"><span class="badge warning">warning</span><span class="badge-print" aria-hidden="true">▣▣ warning</span></td><td data-label="Fix">—</td></tr><tr><td data-label="#"><span class="prio-num">7</span></td><td data-label="Table.Column"><code>ARTICLES.ARTID</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">article_identifier</span></td></tr><tr><td data-label="#"><span class="prio-num">8</span></td><td data-label="Table.Column"><code>CLIENTS.ACTFLG</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">active_flag</span></td></tr><tr><td data-label="#"><span class="prio-num">9</span></td><td data-label="Table.Column"><code>CLIENTS.ACTFLG</code></td><td data-label="Rule"><code>R08</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><pre class="sql">CASE WHEN ACTFLG IN (&#x27;Y&#x27;, &#x27;1&#x27;) THEN TRUE WHEN ACTFLG IN (&#x27;N&#x27;, &#x27;0&#x27;) THEN FALSE END</pre></td></tr><tr><td data-label="#"><span class="prio-num">10</span></td><td data-label="Table.Column"><code>CLIENTS.CUSID</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">customer_identifier</span></td></tr><tr><td data-label="#"><span class="prio-num">11</span></td><td data-label="Table.Column"><code>CLIENTS.CUSNAME</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">customer_name</span></td></tr><tr><td data-label="#"><span class="prio-num">12</span></td><td data-label="Table.Column"><code>COMMANDES.CUSID</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">customer_identifier</span></td></tr><tr><td data-label="#"><span class="prio-num">13</span></td><td data-label="Table.Column"><code>COMMANDES.ORDID</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">order_identifier</span></td></tr><tr><td data-label="#"><span class="prio-num">14</span></td><td data-label="Table.Column"><code>COMMANDES.ORDSTS</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">order_status</span></td></tr><tr><td data-label="#"><span class="prio-num">15</span></td><td data-label="Table.Column"><code>LIGNES_CMD.ARTID</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">article_identifier</span></td></tr><tr><td data-label="#"><span class="prio-num">16</span></td><td data-label="Table.Column"><code>LIGNES_CMD.ORDID</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix"><span class="prio-fix">order_identifier</span></td></tr><tr><td data-label="#"><span class="prio-num">17</span></td><td data-label="Table.Column"><code>LIGNES_CMD.TAGS</code></td><td data-label="Rule"><code>R06</code></td><td data-label="Severity"><span class="badge info">info</span><span class="badge-print" aria-hidden="true">□□ info</span></td><td data-label="Fix">—</td></tr></tbody></table></div></section>
+<section class="table-block" id="table-articles"><h2>Table <code>ARTICLES</code></h2><div class="panel"><table class="data-table"><thead><tr><th>Column</th><th>Type</th><th>Suggested name</th></tr></thead><tbody><tr><td data-label="Column"><code>ARTID</code></td><td class="col-type" data-label="Type">CHAR(10)</td><td data-label="Suggested name"><code>article_identifier</code></td></tr><tr><td data-label="Column"><code>ARTDESC</code></td><td class="col-type" data-label="Type">CHAR(40)</td><td data-label="Suggested name">—</td></tr><tr><td data-label="Column"><code>CRTDTE</code></td><td class="col-type" data-label="Type">DECIMAL(7)</td><td data-label="Suggested name">—</td></tr><tr><td data-label="Column"><code>STDPRC</code></td><td class="col-type" data-label="Type">DECIMAL(9)</td><td data-label="Suggested name">—</td></tr></tbody></table></div><h3 class="issues-heading">Issues in this table</h3><article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">ARTICLES.ARTID</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column ARTICLES.ARTID has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>article_identifier</code></p>
+</article>
+<article class="finding finding-warning">
+<div class="finding-head">
+<span class="finding-target">ARTICLES.CRTDTE</span>
+<span class="finding-rule">R02</span>
+<span class="badge warning">warning</span>
+<span class="badge-print" aria-hidden="true">▣▣ warning</span>
+</div>
+<p class="business">Dates locked in IBM century numeric format (CYYMMDD); convert before any calendar use.</p>
+<p class="message">Column ARTICLES.CRTDTE stores dates as DEC(7,0) IBM CYYMMDD</p>
+<p class="fix-label">Suggested cleanup SQL</p>
+<pre class="sql">TO_DATE(CASE WHEN SUBSTR(LPAD(CAST(CRTDTE AS VARCHAR), 7, &#x27;0&#x27;), 1, 1) = &#x27;0&#x27; THEN &#x27;19&#x27; ELSE &#x27;20&#x27; END || SUBSTR(LPAD(CAST(CRTDTE AS VARCHAR), 7, &#x27;0&#x27;), 2, 6), &#x27;YYYYMMDD&#x27;)</pre>
+</article></section>
+<section class="table-block" id="table-clients"><h2>Table <code>CLIENTS</code></h2><div class="panel"><table class="data-table"><thead><tr><th>Column</th><th>Type</th><th>Suggested name</th></tr></thead><tbody><tr><td data-label="Column"><code>CUSID</code></td><td class="col-type" data-label="Type">CHAR(10)</td><td data-label="Suggested name"><code>customer_identifier</code></td></tr><tr><td data-label="Column"><code>CUSNAME</code></td><td class="col-type" data-label="Type">CHAR(30)</td><td data-label="Suggested name"><code>customer_name</code></td></tr><tr><td data-label="Column"><code>ACTFLG</code></td><td class="col-type" data-label="Type">CHAR(1)</td><td data-label="Suggested name"><code>active_flag</code></td></tr><tr><td data-label="Column"><code>PHNNUM</code></td><td class="col-type" data-label="Type">DECIMAL(8)</td><td data-label="Suggested name">—</td></tr></tbody></table></div><h3 class="issues-heading">Issues in this table</h3><article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">CLIENTS.CUSID</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column CLIENTS.CUSID has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>customer_identifier</code></p>
+</article>
+<article class="finding finding-critical">
+<div class="finding-head">
+<span class="finding-target">CLIENTS.CUSNAME</span>
+<span class="finding-rule">R03</span>
+<span class="badge critical">critical</span>
+<span class="badge-print" aria-hidden="true">■■ critical</span>
+</div>
+<p class="business">Character data stored in binary encoding; must be translated before any export.</p>
+<p class="message">Column CLIENTS.CUSNAME has CCSID 65535 (binary / no character conversion)</p>
+<p class="fix-label">Suggested cleanup SQL</p>
+<pre class="sql">CAST(CUSNAME AS VARCHAR) /* TODO: apply CCSID 65535 translation table */</pre>
+</article>
+<article class="finding finding-warning">
+<div class="finding-head">
+<span class="finding-target">CLIENTS.CUSNAME</span>
+<span class="finding-rule">R05</span>
+<span class="badge warning">warning</span>
+<span class="badge-print" aria-hidden="true">▣▣ warning</span>
+</div>
+<p class="business">Blank strings are used instead of NULL; clean before joins and exports.</p>
+<p class="message">Column CLIENTS.CUSNAME uses blanks as NULL (40% of sample)</p>
+<p class="fix-label">Suggested cleanup SQL</p>
+<pre class="sql">NULLIF(TRIM(CUSNAME), &#x27;&#x27;)</pre>
+</article>
+<article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">CLIENTS.CUSNAME</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column CLIENTS.CUSNAME has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>customer_name</code></p>
+</article>
+<article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">CLIENTS.ACTFLG</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column CLIENTS.ACTFLG has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>active_flag</code></p>
+</article>
+<article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">CLIENTS.ACTFLG</span>
+<span class="finding-rule">R08</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Y/N (or 1/0) flag stored as text; cast to boolean in the warehouse.</p>
+<p class="message">Column CLIENTS.ACTFLG looks like a binary flag ([&#x27;N&#x27;, &#x27;Y&#x27;])</p>
+<p class="fix-label">Suggested cleanup SQL</p>
+<pre class="sql">CASE WHEN ACTFLG IN (&#x27;Y&#x27;, &#x27;1&#x27;) THEN TRUE WHEN ACTFLG IN (&#x27;N&#x27;, &#x27;0&#x27;) THEN FALSE END</pre>
+</article></section>
+<section class="table-block" id="table-commandes"><h2>Table <code>COMMANDES</code></h2><div class="panel"><table class="data-table"><thead><tr><th>Column</th><th>Type</th><th>Suggested name</th></tr></thead><tbody><tr><td data-label="Column"><code>ORDID</code></td><td class="col-type" data-label="Type">CHAR(10)</td><td data-label="Suggested name"><code>order_identifier</code></td></tr><tr><td data-label="Column"><code>CUSID</code></td><td class="col-type" data-label="Type">CHAR(10)</td><td data-label="Suggested name"><code>customer_identifier</code></td></tr><tr><td data-label="Column"><code>ORDDTE</code></td><td class="col-type" data-label="Type">DECIMAL(8)</td><td data-label="Suggested name">—</td></tr><tr><td data-label="Column"><code>ORDSTS</code></td><td class="col-type" data-label="Type">CHAR(1)</td><td data-label="Suggested name"><code>order_status</code></td></tr></tbody></table></div><h3 class="issues-heading">Issues in this table</h3><article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">COMMANDES.ORDID</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column COMMANDES.ORDID has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>order_identifier</code></p>
+</article>
+<article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">COMMANDES.CUSID</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column COMMANDES.CUSID has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>customer_identifier</code></p>
+</article>
+<article class="finding finding-warning">
+<div class="finding-head">
+<span class="finding-target">COMMANDES.ORDDTE</span>
+<span class="finding-rule">R01</span>
+<span class="badge warning">warning</span>
+<span class="badge-print" aria-hidden="true">▣▣ warning</span>
+</div>
+<p class="business">Dates stored as plain numbers (YYYYMMDD); convert before any calendar use.</p>
+<p class="message">Column COMMANDES.ORDDTE stores dates as DEC(8,0) YYYYMMDD</p>
+<p class="fix-label">Suggested cleanup SQL</p>
+<pre class="sql">TO_DATE(TO_CHAR(ORDDTE), &#x27;YYYYMMDD&#x27;)</pre>
+</article>
+<article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">COMMANDES.ORDSTS</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column COMMANDES.ORDSTS has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>order_status</code></p>
+</article></section>
+<section class="table-block" id="table-lignes_cmd"><h2>Table <code>LIGNES_CMD</code></h2><div class="panel"><table class="data-table"><thead><tr><th>Column</th><th>Type</th><th>Suggested name</th></tr></thead><tbody><tr><td data-label="Column"><code>ORDID</code></td><td class="col-type" data-label="Type">CHAR(10)</td><td data-label="Suggested name"><code>order_identifier</code></td></tr><tr><td data-label="Column"><code>ARTID</code></td><td class="col-type" data-label="Type">CHAR(10)</td><td data-label="Suggested name"><code>article_identifier</code></td></tr><tr><td data-label="Column"><code>QTY</code></td><td class="col-type" data-label="Type">DECIMAL(7)</td><td data-label="Suggested name">—</td></tr><tr><td data-label="Column"><code>PRC</code></td><td class="col-type" data-label="Type">DECIMAL(9)</td><td data-label="Suggested name">—</td></tr><tr><td data-label="Column"><code>TAGS</code></td><td class="col-type" data-label="Type">VARCHAR(50)</td><td data-label="Suggested name">—</td></tr></tbody></table></div><h3 class="issues-heading">Issues in this table</h3><article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">LIGNES_CMD.ORDID</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column LIGNES_CMD.ORDID has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>order_identifier</code></p>
+</article>
+<article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">LIGNES_CMD.ARTID</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column LIGNES_CMD.ARTID has an obscure short name</p>
+<p class="fix-label">Suggested clearer name</p>
+<p class="fix-inline"><code>article_identifier</code></p>
+</article>
+<article class="finding finding-warning">
+<div class="finding-head">
+<span class="finding-target">LIGNES_CMD.PRC</span>
+<span class="finding-rule">R04</span>
+<span class="badge warning">warning</span>
+<span class="badge-print" aria-hidden="true">▣▣ warning</span>
+</div>
+<p class="business">Packed decimals hide an implied scale; values look like integers until divided.</p>
+<p class="message">Column LIGNES_CMD.PRC stores an implied decimal with scale 2</p>
+<p class="fix-label">Suggested cleanup SQL</p>
+<pre class="sql">CAST(PRC / 100 AS DECIMAL(9, 2))</pre>
+</article>
+<article class="finding finding-info">
+<div class="finding-head">
+<span class="finding-target">LIGNES_CMD.TAGS</span>
+<span class="finding-rule">R06</span>
+<span class="badge info">info</span>
+<span class="badge-print" aria-hidden="true">□□ info</span>
+</div>
+<p class="business">Short cryptic column name; rename for clarity in analytics models.</p>
+<p class="message">Column LIGNES_CMD.TAGS has an undecoded short name</p>
+</article>
+<article class="finding finding-warning">
+<div class="finding-head">
+<span class="finding-target">LIGNES_CMD.TAGS</span>
+<span class="finding-rule">R07</span>
+<span class="badge warning">warning</span>
+<span class="badge-print" aria-hidden="true">▣▣ warning</span>
+</div>
+<p class="business">Multiple values packed into one cell; split before relational use.</p>
+<p class="message">Column LIGNES_CMD.TAGS looks multi-valued (separator &#x27;|&#x27; in 33% of samples)</p>
+</article></section>
+<section class="decoded"><h2>Decoded column names</h2><p class="section-hint">Short IBM i names mapped to clearer names when the abbreviation dictionary could decode them.</p><div class="panel"><table class="data-table"><thead><tr><th>Table</th><th>Short name</th><th>Suggested long name</th></tr></thead><tbody><tr><td data-label="Table"><code>ARTICLES</code></td><td data-label="Short name"><code>ARTID</code></td><td data-label="Suggested long name"><code>article_identifier</code></td></tr><tr><td data-label="Table"><code>CLIENTS</code></td><td data-label="Short name"><code>ACTFLG</code></td><td data-label="Suggested long name"><code>active_flag</code></td></tr><tr><td data-label="Table"><code>CLIENTS</code></td><td data-label="Short name"><code>CUSID</code></td><td data-label="Suggested long name"><code>customer_identifier</code></td></tr><tr><td data-label="Table"><code>CLIENTS</code></td><td data-label="Short name"><code>CUSNAME</code></td><td data-label="Suggested long name"><code>customer_name</code></td></tr><tr><td data-label="Table"><code>COMMANDES</code></td><td data-label="Short name"><code>CUSID</code></td><td data-label="Suggested long name"><code>customer_identifier</code></td></tr><tr><td data-label="Table"><code>COMMANDES</code></td><td data-label="Short name"><code>ORDID</code></td><td data-label="Suggested long name"><code>order_identifier</code></td></tr><tr><td data-label="Table"><code>COMMANDES</code></td><td data-label="Short name"><code>ORDSTS</code></td><td data-label="Suggested long name"><code>order_status</code></td></tr><tr><td data-label="Table"><code>LIGNES_CMD</code></td><td data-label="Short name"><code>ARTID</code></td><td data-label="Suggested long name"><code>article_identifier</code></td></tr><tr><td data-label="Table"><code>LIGNES_CMD</code></td><td data-label="Short name"><code>ORDID</code></td><td data-label="Suggested long name"><code>order_identifier</code></td></tr></tbody></table></div></section>
+</div>
+<footer class="report-footer">
+<span>Db2iLens discovery report</span>
+<span class="dot" aria-hidden="true"></span>
+<span>Read-only scan</span>
+<span class="dot" aria-hidden="true"></span>
+<span><strong>Lattice</strong> by Mokai Studio</span>
+</footer>
+<div class="print-footer" aria-hidden="true">Db2iLens discovery report · read-only scan · Lattice by Mokai Studio</div>
+</body>
+</html>
