@@ -1,18 +1,18 @@
-# Règles du projet Db2iLens
+# Db2iLens Project Rules
 
-## Contexte
-Outil Python en lecture seule qui profile des données IBM i et génère du dbt.
-L'utilisateur travaille en français ou anglais ; le code et les identifiants sont en anglais.
+## Context
+Read-only Python tool that profiles IBM i data and generates dbt.
+Users work in French or English; code and identifiers are in English.
 
 ## Conventions
-- Python 3.11+, typing strict (mypy), formatage ruff, tests pytest obligatoires.
-- Tout accès DB passe par src/db2ilens/connector/. Aucun SQL en dehors.
-- Aucune requête ne doit modifier la source : SELECT uniquement, jamais de DML/DDL.
-- Chaque règle de détection hérite de rules/base.py::Rule (id, sévérité, detect, fix).
-- Les mots de passe ne sont jamais écrits dans le code, les logs ou les fichiers de test.
-- Les templates dbt sont en Jinja2 dans db2ilens/dbtgen/templates/, jamais de SQL en dur dans le Python.
+- Python 3.11+, strict typing (mypy), ruff formatting, mandatory pytest tests.
+- All database access **must** go through `src/db2ilens/connector/`. No SQL outside this directory.
+- No query must modify the source: **SELECT only**, never DML/DDL.
+- Each detection rule inherits from `rules/base.py::Rule` (id, severity, detect, fix).
+- Passwords are **never** written in code, logs, or test files.
+- dbt templates are Jinja2 templates in `db2ilens/dbtgen/templates/`, never hardcoded SQL in Python.
 
-## Avant de terminer une tâche
-1. `ruff check . && mypy src && pytest` passent.
-2. Toute nouvelle règle vient avec un fixture la déclenchant et un test.
-3. Toute nouvelle commande CLI vient avec un test e2e en mode offline.
+## Before Completing a Task
+1. `ruff check . && mypy src && pytest` must pass.
+2. Every new rule **must** come with a fixture that triggers it and a unit test.
+3. Every new CLI command **must** come with an offline end-to-end test.
