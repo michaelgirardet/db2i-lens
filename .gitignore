@@ -32,6 +32,7 @@ htmlcov/
 # IDE / OS
 .idea/
 .vscode/
+.cursor/
 *.swp
 .DS_Store
 Thumbs.db
@@ -51,3 +52,6 @@ credentials.json
 # JT400 JDBC driver (download via scripts/fetch_jt400.sh)
 jt400.jar
 **/jt400.jar
+
+# Local/demo artifacts (never commit dirty snapshots)
+rapport-demo.html
